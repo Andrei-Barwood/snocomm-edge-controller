@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AHF Edge Controller Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>AHF Edge Controller - Panel SCADA</h1>
+        <button id="toggle-pause">Pausar Actualización</button>
+    </header>
+
+    <main>
+        <section class="kpi-container">
+            <div class="kpi-card">
+                <h3>Latencia Modbus (Lectura)</h3>
+                <p id="kpi-read">-- ms</p>
+            </div>
+            <div class="kpi-card">
+                <h3>Latencia DSP (Ejecución)</h3>
+                <p id="kpi-dsp">-- ms</p>
+            </div>
+            <div class="kpi-card">
+                <h3>Frecuencia PLL</h3>
+                <p id="kpi-freq">-- Hz</p>
+            </div>
+            <div class="kpi-card">
+                <h3>THDi Total</h3>
+                <p id="kpi-thdi">-- %</p>
+            </div>
+            <div class="kpi-card" id="sat-card">
+                <h3>Estado Hardware</h3>
+                <p id="kpi-sat" style="color: #69f0ae;">OK</p>
+            </div>
+        </section>
+
+        <section class="charts-container">
+            <div class="chart-wrapper">
+                <h2>Onda Cruda vs Compensada</h2>
+                <canvas id="waveformChart"></canvas>
+            </div>
+            <div class="chart-wrapper">
+                <h2>Espectro de Frecuencia (FFT)</h2>
+                <canvas id="spectrumChart"></canvas>
+            </div>
+        </section>
+
+        <section class="logs-container">
+            <h2>Registro de Eventos en Vivo</h2>
+            <div id="logs-box"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Snocomm Edge Controller. Prohibida su venta.</p>
+        <p><small>Ingeniería por ਕਿਰਤਅਨ ਤੈਗ ਸਿਨਗਹ (Kirtan Teg Singh)</small></p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Certificados SSL/TLS (¡Nunca subir claves privadas al repo!)
+certs/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Archivos del SO
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:2.7
+    container_name: ahf_influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminpassword
+      - DOCKER_INFLUXDB_INIT_ORG=snocomm
+      - DOCKER_INFLUXDB_INIT_BUCKET=telemetry
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-super-secret-auth-token
+    restart: unless-stopped
+
+  edge_controller:
+    build: .
+    container_name: ahf_edge_controller
+    depends_on:
+      - influxdb
+    # IPC host o shm_size es CRÍTICO para que multiprocessing.shared_memory funcione en Docker
+    shm_size: '256mb' 
+    ports:
+      - "8080:8080" # Dashboard Web
+      - "5020:5020" # Modbus TCP
+      - "8020:8020" # Modbus Secure (TLS)
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: on-failure
+
+volumes:
+  influxdb-data:

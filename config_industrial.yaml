@@ -1,0 +1,35 @@
+system:
+  mode: "simulation" # "simulation" or "hardware"
+
+network:
+  nominal_frequency: 50.0 # Hz
+  sampling_rate: 12800 # Hz
+  samples_per_batch: 128 # 10 ms batches at 12.8 kHz for CPU-efficient processing
+
+pll:
+  kp: 0.5
+  ki: 5.0
+  initial_freq: 50.0
+
+dsp:
+  target_harmonics: [3, 5, 7]
+  system_delay_samples: 2 # Assuming 2 samples delay for ADC -> DSP -> DAC processing
+  
+hardware:
+  max_current_rms: 100.0 # Maximum allowed injection current in Amps
+
+scada:
+  host: "0.0.0.0"
+  port: 5020 # Standard Modbus TCP
+  unit_id: 1
+  tls:
+    enabled: true
+    port: 8020 # Standard Modbus TLS
+    certfile: "certs/server.crt"
+    keyfile: "certs/server.key"
+
+influxdb:
+  url: "http://influxdb:8086"
+  token: "ahf-secret-token" # Replace with actual token or use setup script
+  org: "ahf_org"
+  bucket: "ahf_telemetry"

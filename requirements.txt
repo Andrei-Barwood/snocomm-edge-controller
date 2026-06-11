@@ -1,0 +1,4 @@
+numpy
+scipy
+pymodbus==3.5.0
+pyyaml

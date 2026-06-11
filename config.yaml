@@ -1,0 +1,18 @@
+network:
+  fundamental_frequency: 50        # Hz
+  sampling_rate: 12800             # muestras por segundo (256 muestras/ciclo a 50 Hz)
+  samples_per_frame: 256           # longitud de la ventana de análisis
+thd_limits:
+  voltage_thd: 5.0                 # % máximo tolerado (informativo)
+  current_thd: 8.0                 # % máximo tolerado (informativo)
+scada:
+  protocol: modbus                 # modbus u opcua
+  host: 127.0.0.1
+  port: 5020                       # puerto Modbus TCP
+  raw_waveform_register: 0         # dirección holding register inicio onda cruda
+  compensation_register: 1000      # dirección inicio onda de compensación
+  unit_id: 1
+  chunk_size_registers: 100        # Número de registros de 16 bits por petición Modbus (max 125)
+logging:
+  level: INFO                      # DEBUG, INFO, WARNING, ERROR
+  file: ahf_controller.log
