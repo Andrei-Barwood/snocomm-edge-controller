@@ -1,0 +1,9 @@
+Copias desde output/web/ (no regeneradas):
+  tan_ejemplo_origen_web.html  <-  output/web/TT-M-20260821-154033_informe.html
+  tan_ejemplo_origen_web.pdf   <-  output/web/TT-M-20260821-154033_resumen.pdf
+
+Caso TAN small generado hacia output/tpa/tan_small/ con el API de
+tan_telecom (example small). No se escribió en output/web/.
+
+Prediseño académico. No es ensayo a 400 V.
+Autor: Andres Barbudo Rodriguez — CFT Paillaco — 21-ago-2026

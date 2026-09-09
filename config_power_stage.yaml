@@ -1,0 +1,28 @@
+# Banco HIL 24 V: límites alineados a la wanptek KPS305D (0–30 V / 0–5 A).
+# No son valores de diseño para un producto de 400 V ni para 48 V.
+mode: "HIL_SIMULATION_ONLY"
+physical_outputs_available: false
+
+rating:
+  dc_bus_v: 24.0
+  power_w: 120.0
+  current_a: 5.0
+  source_ceiling_v: 30.0
+  instrument: "wanptek KPS305D"
+
+protection:
+  overcurrent_trip_a: 5.5
+  dc_overvoltage_trip_v: 29.0
+  dc_undervoltage_trip_v: 18.0
+  overtemperature_trip_c: 85.0
+
+sequence:
+  precharge_target_ratio: 0.90
+  precharge_timeout_s: 5.0
+  self_test_duration_s: 0.35
+
+hardware_policy:
+  raspberry_pi_may_generate_pwm: false
+  raspberry_pi_may_override_trip: false
+  estop_must_be_hardwired: true
+  overcurrent_trip_must_be_hardware: true

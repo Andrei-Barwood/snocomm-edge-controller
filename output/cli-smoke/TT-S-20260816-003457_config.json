@@ -1,0 +1,327 @@
+{
+  "project_id": "TT-S-20260816-003457",
+  "version": "1.0.0",
+  "generated_at": "2026-08-16T00:34:57.550470+00:00",
+  "inputs": {
+    "potencia_kw": 45.0,
+    "num_racks": 4,
+    "redundancia": "N",
+    "ip_minimo": 54,
+    "carga_armonica": false,
+    "sismico": false,
+    "output_dir": "/Users/andreibarwood/Documents/snocomm/snocomm-edge-controller/output/cli-smoke",
+    "verbose": false,
+    "example_name": "small",
+    "tension_v": 400.0,
+    "cos_phi": 0.9,
+    "rendimiento": 0.95
+  },
+  "electrical": {
+    "in_base_a": 75.97,
+    "factor_redundancia": 1.0,
+    "in_diseno_a": 75.97,
+    "in_seleccion_a": 80.0,
+    "icc_estimada_ka": 16.0,
+    "icw_requerida_ka": 16.0,
+    "rdf": 0.8,
+    "factor_simultaneidad": 0.85,
+    "factor_utilizacion": 0.8,
+    "potencia_disipada_w": 26.7,
+    "delta_t_estimado_c": 10.7,
+    "calentamiento_ok": true,
+    "limite_delta_t_c": 30.0,
+    "formula_in": "In = (P·1000)/(√3·V·cosφ·η) = (45.0·1000)/(√3·400.0·0.9·0.95)",
+    "notas": [
+      "In base calculada a 400 V, cosφ=0.9, η=0.95.",
+      "Factor de redundancia (N) = 1.00.",
+      "RDF = 0.80 para 4 circuitos/salidas."
+    ]
+  },
+  "enclosure": {
+    "codigo": "XL3-160",
+    "nombre": "XL³ 160",
+    "corriente_max_a": 160.0,
+    "icw_ka": 25.0,
+    "icc_ka": 25.0,
+    "ip_seleccionado": 55,
+    "ip_disponibles": [
+      30,
+      40,
+      43,
+      55
+    ],
+    "dimensiones_mm": {
+      "ancho_tipico": 575,
+      "alto_tipico": 1050,
+      "fondo_tipico": 175,
+      "modulos_referencia": "mural / suelo compacto"
+    },
+    "formas_soportadas": [
+      "1",
+      "2a",
+      "2b",
+      "3a",
+      "3b",
+      "4a",
+      "4b"
+    ],
+    "resistencia_sismica": false,
+    "justificacion": [
+      "Menor envolvente que cumple In de selección 80 A (capacidad 160 A).",
+      "Icw/Icc catálogo 25/25 kA ≥ requeridos 16.0/16.0 kA.",
+      "IP disponible compatible con IP54 (seleccionada IP55).",
+      "Capacidad de salidas: hasta 12 (proyecto: 4)."
+    ],
+    "alternativas": [
+      "XL3-800",
+      "XL3-4000"
+    ]
+  },
+  "separation": {
+    "forma": "2b",
+    "criticidad": "media",
+    "familia_tan": "TT-S",
+    "justificacion": [
+      "Nodo pequeño / acceso (familia TT-S): Forma 2b es el mejor balance global.",
+      "Compartimento de bornes separado de barras; UF en zona común segregada de barras.",
+      "Evita sobrecosto de Form 4b sin beneficio operativo medible en este rango."
+    ],
+    "alternativas": [
+      "3b",
+      "1"
+    ]
+  },
+  "verifications": [
+    {
+      "numero": 1,
+      "caracteristica": "Resistencia de materiales y partes (corrosión, estabilidad térmica, resistencia al fuego, UV, elevación, impacto, marcación)",
+      "articulo": "10.2",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "SÍ*",
+      "estado": "CUBIERTO por diseño de referencia XL³/TAN",
+      "observaciones": "Depende del sistema de envolvente verificado del fabricante original."
+    },
+    {
+      "numero": 2,
+      "caracteristica": "Grado de protección IP",
+      "articulo": "10.3",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "CUMPLE",
+      "observaciones": "IP requerido IP54; seleccionado IP55."
+    },
+    {
+      "numero": 3,
+      "caracteristica": "Distancias de aislación",
+      "articulo": "10.4",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "NO",
+      "estado": "CUBIERTO (diseño de referencia)",
+      "observaciones": "Mantener clearances del sistema de barras y aparatos instalados."
+    },
+    {
+      "numero": 4,
+      "caracteristica": "Líneas de fuga",
+      "articulo": "10.4",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "NO",
+      "estado": "CUBIERTO (diseño de referencia)",
+      "observaciones": "Verificar contaminación / CTI de materiales en ambiente del sitio."
+    },
+    {
+      "numero": 5,
+      "caracteristica": "Protección contra descargas eléctricas e integridad de circuitos de protección (continuidad PE / resistencia ante cortocircuito del PE)",
+      "articulo": "10.5",
+      "ensayos": "SÍ",
+      "comparacion": "SÍ",
+      "evaluacion": "NO",
+      "estado": "A COMPLETAR por ensamblador (ensayo/rutina)",
+      "observaciones": "Continuidade PE y bornes de tierra: verificación de rutina obligatoria."
+    },
+    {
+      "numero": 6,
+      "caracteristica": "Integración de aparatos de conexión y componentes",
+      "articulo": "10.6",
+      "ensayos": "NO",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "CUBIERTO por reglas de diseño del sistema",
+      "observaciones": "Forma 2b: respetar kits de segregación y zonas UF."
+    },
+    {
+      "numero": 7,
+      "caracteristica": "Circuitos internos y conexiones",
+      "articulo": "10.7",
+      "ensayos": "NO",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "A COMPLETAR por ensamblador",
+      "observaciones": "Cableado interno según secciones y torque de bornes del fabricante."
+    },
+    {
+      "numero": 8,
+      "caracteristica": "Bornes para conductores externos",
+      "articulo": "10.8",
+      "ensayos": "NO",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "CUBIERTO (diseño + forma de separación)",
+      "observaciones": "Forma 2b: bornes en zona conforme a variante a/b."
+    },
+    {
+      "numero": 9,
+      "caracteristica": "Propiedades dieléctricas (tensión a frecuencia industrial e impulso)",
+      "articulo": "10.9",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "CUBIERTO por diseño de referencia / ensayo de tipo",
+      "observaciones": "Ue/Ui/Uimp de placa deben declararse en el conjunto final."
+    },
+    {
+      "numero": 10,
+      "caracteristica": "Límites de calentamiento (elevación de temperatura)",
+      "articulo": "10.10",
+      "ensayos": "SÍ",
+      "comparacion": "SÍ",
+      "evaluacion": "SÍ",
+      "estado": "CUMPLE (estimación)",
+      "observaciones": "ΔT estimado 10.7 °C (límite ref. 30.0 °C); RDF=0.8, P_loss≈26.7 W. No sustituye ensayo de tipo."
+    },
+    {
+      "numero": 11,
+      "caracteristica": "Resistencia a cortocircuitos",
+      "articulo": "10.11",
+      "ensayos": "SÍ",
+      "comparacion": "SÍ",
+      "evaluacion": "NO",
+      "estado": "CUMPLE (catálogo ≥ req.)",
+      "observaciones": "Icc/Icw requeridos ≈ 16.0/16.0 kA; envolvente XL3-160 Icw/Icc 25.0/25.0 kA."
+    },
+    {
+      "numero": 12,
+      "caracteristica": "Compatibilidad electromagnética (CEM)",
+      "articulo": "10.12",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "CUBIERTO (condiciones de instalación típicas)",
+      "observaciones": "En telecomunicaciones, cuidar segregación de potencias y tierras de señal."
+    },
+    {
+      "numero": 13,
+      "caracteristica": "Funcionamiento mecánico",
+      "articulo": "10.13",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "NO",
+      "estado": "A COMPLETAR por ensamblador (rutina)",
+      "observaciones": "Maniobras de aparatos, enclavamiento y cierre de puertas."
+    },
+    {
+      "numero": 14,
+      "caracteristica": "Resistencia sísmica / condiciones especiales de servicio",
+      "articulo": "IEC 60068-3-3 / UBC (si aplica)",
+      "ensayos": "SÍ",
+      "comparacion": "SÍ",
+      "evaluacion": "SÍ",
+      "estado": "N/A",
+      "observaciones": "No requerido en esta configuración."
+    }
+  ],
+  "bom": [
+    {
+      "codigo": "ENV-XL3-160",
+      "descripcion": "Envolvente XL³ 160 IP55",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Envolvente",
+      "observaciones": "In max 160.0 A"
+    },
+    {
+      "codigo": "BAR-CU-MAIN",
+      "descripcion": "Juego de barras de cobre dimensionado a 80 A",
+      "cantidad": 1,
+      "unidad": "juego",
+      "categoria": "Barras",
+      "observaciones": "Icw ref. 16.0 kA"
+    },
+    {
+      "codigo": "QG-MAIN",
+      "descripcion": "Interruptor/seccionador general 80 A",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Aparatos",
+      "observaciones": "Redundancia N"
+    },
+    {
+      "codigo": "KIT-FORM-2B",
+      "descripcion": "Kit de segregación interna Forma 2b",
+      "cantidad": 1,
+      "unidad": "juego",
+      "categoria": "Separación",
+      "observaciones": "Plastrones, tabiques, canalizaciones de forma"
+    },
+    {
+      "codigo": "UF-RACK-OUT",
+      "descripcion": "Unidades funcionales / salidas a racks",
+      "cantidad": 4,
+      "unidad": "u",
+      "categoria": "Salidas",
+      "observaciones": "Protecciones por rack tipificadas"
+    },
+    {
+      "codigo": "UF-CLIMA",
+      "descripcion": "Salida clima / ventilación",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Salidas",
+      "observaciones": ""
+    },
+    {
+      "codigo": "UF-UPS",
+      "descripcion": "Salida UPS / servicios críticos",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Salidas",
+      "observaciones": ""
+    },
+    {
+      "codigo": "UF-AUX",
+      "descripcion": "Auxiliares (iluminación tablero, tomas de servicio)",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Salidas",
+      "observaciones": ""
+    },
+    {
+      "codigo": "BOR-EXT",
+      "descripcion": "Bornes para conductores externos + PE",
+      "cantidad": 1,
+      "unidad": "juego",
+      "categoria": "Conexionado",
+      "observaciones": "Zona de cables según forma a/b"
+    },
+    {
+      "codigo": "ID-PLATE",
+      "descripcion": "Placa de características IEC 61439 + marcaje TAN-Telecom",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Documentación",
+      "observaciones": ""
+    },
+    {
+      "codigo": "DOC-PACK",
+      "descripcion": "Paquete documental (unifilar, verificaciones, declaración)",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Documentación",
+      "observaciones": ""
+    }
+  ],
+  "warnings": []
+}

@@ -17,10 +17,19 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pymodbus.server import StartAsyncTcpServer, StartAsyncTlsServer
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusServerContext, ModbusSlaveContext
+from tan_service import router as tan_router
+from power_stage_service import router as power_stage_router
+from project_service import router as project_router
+from acquisition_service import router as acquisition_router
+from project_store import store
 
 logger = logging.getLogger("Supervisory")
 
 app = FastAPI()
+app.include_router(tan_router)
+app.include_router(power_stage_router)
+app.include_router(project_router)
+app.include_router(acquisition_router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
@@ -62,13 +71,16 @@ async def telemetry_broadcaster():
         # 1. Update Modbus Registers (Registers 0-10)
         # Using a simple integer scaling for float values
         if modbus_store is not None:
+            store.update_monitor(data)
             modbus_store.setValues(3, 0, [
-                int(data['thdi'] * 10),
-                int(data['freq_est'] * 100),
-                int(data['h3_rms'] * 10),
-                int(data['h5_rms'] * 10),
-                int(data['h7_rms'] * 10),
-                1 if data['is_saturated'] else 0
+                int(data.get('thdi', 0) * 10),
+                int(data.get('freq_est', 0) * 100),
+                int(data.get('h3_rms', 0) * 10),
+                int(data.get('h5_rms', 0) * 10),
+                int(data.get('h7_rms', 0) * 10),
+                1 if data.get('is_saturated') else 0,
+                int(data.get('i1_rms', 0) * 10),
+                int(data.get('in_rms', 0) * 10),
             ])
             
         # 2. Update WebSocket clients
@@ -93,9 +105,11 @@ async def telemetry_broadcaster():
                     .field("freq_est", float(data['freq_est'])) \
                     .field("h3_rms", float(data['h3_rms'])) \
                     .field("h5_rms", float(data['h5_rms'])) \
-                    .field("h7_rms", float(data['h7_rms'])) \
-                    .field("is_saturated", bool(data['is_saturated'])) \
-                    .field("t_dsp_ms", float(data['t_dsp_ms']))
+                    .field("h7_rms", float(data.get('h7_rms', 0))) \
+                    .field("i1_rms", float(data.get('i1_rms', 0))) \
+                    .field("in_rms", float(data.get('in_rms', 0))) \
+                    .field("is_saturated", bool(data.get('is_saturated'))) \
+                    .field("t_dsp_ms", float(data.get('t_dsp_ms', 0)))
                 influx_write_api.write(bucket=config['influxdb']['bucket'], record=p)
             except Exception as e:
                 logger.error(f"InfluxDB write error: {e}")
@@ -177,6 +191,10 @@ def start_ts_process(cfg, tq):
     global config, telemetry_queue, async_queue, tq_global
     config = cfg
     tq_global = tq
+    mode = cfg.get("system", {}).get("mode", "simulation")
+    acquisition = "hardware_placeholder" if mode == "hardware" else "simulation"
+    pattern = (cfg.get("simulation") or {}).get("pattern")
+    store.configure("industrial", acquisition, "hil_simulation", pattern)
     
     # We will initialize the async queue and replace telemetry_queue with it.
     # The actual bridge thread is started in the startup_event when the loop exists.

@@ -1,0 +1,1106 @@
+================================================================================
+PROMPTS DE SESIÓN — TPA AHF EDGE CONTROLLER
+Autor: Andres Barbudo Rodriguez
+Institución: CFT Paillaco
+Repositorio: snocomm-edge-controller
+Armado: 19-ago-2026
+Instrumentos de pañol confirmados por foto: 21-ago-2026
+Fecha tope del paquete: 31-oct-2026  (antes de noviembre)
+Defensa (supuesto Gantt si no hay fecha de comisión): 04-dic-2026
+================================================================================
+
+INSTRUMENTOS CONFIRMADOS (pañol CFT Paillaco — foto 21-ago-2026)
+Léelo tú. P00 ya se los nombra a Grok. No inventes un segundo modelo.
+
+  Fuente de banco
+    wanptek KPS305D
+    DC POWER SUPPLY  0–30 V / 0–5 A
+    Modo C.V. (tensión constante) y C.C. (corriente limitada)
+    Ajuste COARSE + FINE de V y de A
+    Bornes banana: negro (−) / rojo (+)
+    Punto de trabajo del TPA: 24,0 V  ·  Ilim típica de demo 0,50 A
+    Techo físico: 30 V  →  48 V reales NO caben en esta fuente
+    Potencia máx. de placa: 30 V × 5 A = 150 W  (a 24 V × 5 A = 120 W)
+    No afirmar aislamiento de seguridad clase II ni de convertidor.
+
+  Osciloscopio
+    Gratten GA1102CAL  (placa: GRATTEN · DIGITAL STORAGE OSCILLOSCOPE)
+    100 MHz  ·  1 GSa/s  ·  2 canales (CH1 naranja, CH2 azul)
+    USB Host frontal (pendrive): CSV y bitmap
+    PRINT · SAVE/RECALL · AUTO · RUN/STOP · SINGLE
+    MATH / REF / cursores / MEASURE
+    2 canales → no captura 3P+N a la vez
+    100 MHz sirve para DC 24 V y rizado; NO es analizador de red ni IEC 61000
+
+  Lo que las fotos NO muestran (no lo inventes en ningún prompt):
+    segunda fuente, sondas, carga, generador de funciones, E-stop, contactores.
+
+  Qué SÍ se puede demostrar EN VIVO en el examen de título
+    con estos dos aparatos (clase A presente si hay 24 V energizados):
+      1. Placas: KPS305D 0–30 V / 0–5 A  y  GA1102CAL 100 MHz 2 ch.
+      2. 24,0 V limitados (C.V.) y el techo 30 V (por eso el TPA no es 48 V).
+      3. Límite de corriente: bajar Ilim y ver LED C.C.
+      4. CH1 del Gratten midiendo ~24 V (MEASURE Mean) vs display de la fuente.
+      5. SAVE CSV a pendrive USB → import en Monitor AHF (cadena de archivos).
+      6. PRINT/BMP de la pantalla del scope como evidencia.
+
+  Qué NO se puede demostrar con estos dos aparatos
+      - H3/H5/H7 ni THDi de una carga 3P+N (el DSP se defiende con patrón sintético).
+      - 48 V, 400 V, 500 kW, ~700 A.
+      - Analizador certificado / ensayo SEC.
+      - PWM, GPIO ni contactores mandados por el software.
+
+================================================================================
+
+CÓMO USAR ESTE ARCHIVO (léelo una vez; NO se lo pegues a Grok)
+
+Este es el único archivo de trabajo de aquí en adelante.
+No uses docs/PROMPTS_TPA.txt para lo que falta: eran 22 prompts en 10 días
+hábiles y saturan sesión, computadora y cuota.
+
+  1. Un prompt por chat. Nunca dos bloques en el mismo mensaje.
+  2. Chat NUEVO = pega P00 y, debajo, UN prompt (P02 … P16).
+     Mismo chat con el repo todavía abierto = basta el prompt del día.
+  3. No pases al siguiente si el "criterio de listo" falla.
+  4. No arranques Docker, Influx ni el dashboard salvo que el prompt
+     lo pida. La defensa se sostiene con pytest + hil_app.py.
+  5. Autor en todo documento: Andres Barbudo Rodriguez
+     Institución: CFT Paillaco
+     Nada más en la línea de autor (no cargo, no bodega, no segundo nombre).
+
+Ritmo para llegar antes de noviembre (2 sesiones / semana):
+
+  Semana        Fechas            Prompt     Qué cierra
+  ------------- ----------------- ---------- --------------------------------
+  25–29 ago     lun + jue         P02, P03   inventario y banco 24 V
+  01–05 sep     lun + jue         P04, P05   matriz SIL + tests
+  08–12 sep     un día            P06        procedimiento + bitácora
+  15–19 sep     un día            P07        pytest + carpeta evidencias
+  22–26 sep     un día            P08        demo + informe
+  29 sep–03 oct un día            P09        esqueleto + cap. 1
+  06–10 oct     un día            P10        caps. 2–4 (cortos)
+  13–17 oct     un día            P11        caps. 5–6 (DSP y SIL)
+  20–24 oct     lun + jue         P12, P13   memoria ensamblada + PPTX
+  27–31 oct     lun + jue         P14, P15   preguntas + Gantt nueva
+  nov (ensayo)  un día            P16        guion demo live examen
+
+Si una semana se atrasa, no comprimas dos prompts de CÓDIGO el mismo día
+(P03, P05, P07). Sí puedes hacer dos de SOLO markdown (P08+P09) si hace falta.
+
+Noviembre queda para el guía, el ensayo oral y P16 (demo live con la
+wanptek KPS305D + Gratten GA1102CAL) si la defensa es en pañol o se
+pueden llevar los dos aparatos. El paquete de software y memoria debe
+estar cerrado el 31-oct-2026. Un CSV real del Gratten es PLUS, no
+requisito: el DSP se defiende con patrón sintético.
+
+Lo que este paquete NUNCA pide:
+
+  - Ensayo a 380/400 VAC, 500 kW ni ~700 A.
+  - Inyección de corriente de compensación.
+  - PWM, GPIO o contactores reales mandados por este software.
+  - THDi del dashboard como evidencia IEC/SEC.
+  - Convertir el TPA en producto de 400 V.
+
+Estado al armar este archivo:
+
+  [X] P01  alcance congelado   docs/ALCANCE_TPA_CFT_PAILLACO.md  (19-ago-2026)
+  [X] P00 pegado al menos una vez en el chat de trabajo
+  [X] P02  [X] P03  [X] P04  [X] P05  [X] P06  [X] P07
+  [X] P08  [X] P09  [X] P10  [X] P11  [X] P12  [X] P13
+  [X] P14  [X] P15  [X] P16
+
+Mapa a los prompts viejos (por si comparas):
+
+  P02 = viejo P02
+  P03 = viejo P03
+  P04 = viejo P04
+  P05 = viejo P05
+  P06 = viejos P06+P07
+  P07 = viejos P08+P11
+  P08 = viejos P09+P10
+  P09 = viejos P12+P13
+  P10 = viejos P14+P15+P16 (cortos)
+  P11 = viejos P17+P18
+  P12 = viejo P19
+  P13 = viejo P20
+  P14 = viejo P21
+  P15 = viejo P22
+  P16 = nuevo (guion demo live examen con KPS305D + GA1102CAL)
+
+
+================================================================================
+P00  CONTEXTO PERMANENTE
+Pégalo AL INICIO de cada chat nuevo. No es un trabajo: es la identidad del TPA.
+================================================================================
+
+----- pega desde aquí (P00) -----
+Eres Grok trabajando en el repositorio local snocomm-edge-controller
+(ruta de trabajo actual). Es el TPA de Electricidad del CFT Paillaco.
+
+Autor único (nombre legal, usar en todo documento de entrega):
+  Andres Barbudo Rodriguez
+Institución (única afiliación en portadas):
+  CFT Paillaco
+No agregues cargo, bodega ni segundo autor en la línea de autor.
+
+Contexto del estudiante:
+  Pañol del CFT Paillaco, instrumentos confirmados por foto (21-ago-2026):
+    - Fuente de banco: wanptek KPS305D, 0–30 V / 0–5 A, modos C.V. y C.C.,
+      ajuste COARSE+FINE. Punto de trabajo TPA: 24,0 V con Ilim (demo 0,50 A).
+      Techo físico 30 V: esta fuente NO llega a 48 V.
+    - Osciloscopio: Gratten GA1102CAL, DSO 100 MHz, 1 GSa/s, 2 canales,
+      USB Host (CSV/BMP a pendrive), PRINT, AUTO, RUN/STOP, SINGLE.
+      No es analizador de red. No captura 3P+N a la vez.
+    - Segunda fuente, sondas, carga y generador de funciones: NO fotografiado.
+      No inventes marca/modelo. Si falta, el ensayo live usa solo estos dos
+      más una carga resistiva que Andres declare el día del lab.
+  Cuenta con asistencia de un profesional autorizado con licencia clase A
+  (segunda persona competente en pruebas energizadas de baja tensión).
+  NO hay equipo para ensayar ~700 A a 380/400 V ni 500 kW. Eso está fuera
+  del TPA aunque la licencia clase A lo habilite en otro contexto.
+
+Qué es este repo hoy:
+  Plataforma académica. Calcula y simula. No mide con instrumento certificado
+  ni inyecta corriente. Tres vistas: Monitor AHF, Diseño TAN, Banco 24 V (SIL).
+  El DSP es Clarke αβ0 + SRF-PLL + H3/H5/H7 sobre señales patrón a 12.8 kHz
+  por microbloques. Python sobre SO general no es hard real-time.
+  El HIL (power_stage/) declara physical_outputs_available = false siempre.
+  Límites HIL = pañol: 24 V / 5 A / 120 W (wanptek KPS305D). 48 V está fuera.
+  TAN-Telecom prediseña tableros IEC 61439 (no es un tablero construido).
+  El alcance ya está congelado en docs/ALCANCE_TPA_CFT_PAILLACO.md (P01 hecho,
+  enmienda 21-ago-2026: unificación a 24 V).
+  El banco físico y el modelo HIL del TPA son 24 VDC. No prepares 48 V.
+
+Archivos de verdad (no inventes otros):
+  docs/ALCANCE_TPA_CFT_PAILLACO.md
+  dsp/core.py  dsp/patterns.py  tests/test_dsp.py
+  tan_telecom/  (cálculos, rules, export Excel/PDF)
+  acquisition/  acquisition_service.py  (CSV de osciloscopio / JSON)
+  power_stage/controller.py  tests/test_power_stage.py
+  bench_package.py  docs/BANCO_FISICO_24V.md  docs/POWER_STAGE_24V.md
+  docs/PRODUCT_ROADMAP_CHILE.md  docs/CARTA_GANTT_TPA.pdf
+  hil_app.py  templates/index.html  static/app.js
+  tests/test_api.py  tests/test_acquisition.py  tests/test_project_store.py
+
+Reglas duras, en cada prompt:
+  1. Nunca diseñar, cablear, simular como producto, ni documentar como ensayo
+     un banco de 380/400 VAC, 500 kW o ~700 A.
+  2. Banco físico y HIL del TPA = 24 VDC / 120 W, corriente limitada,
+     wanptek KPS305D (0–30 V / 0–5 A, punto 24,0 V). No diseñes, simules
+     como producto, ni documentes como ensayo un banco de 48 V: no cabe
+     en la fuente. 48 V queda fuera, junto a 400 V / 500 kW.
+     No inventes una segunda fuente ni sondas que no estén en el inventario.
+  3. Este software no genera PWM ni manda contactores. El edge solo supervisa.
+  4. El THDi del dashboard es académico (Ih/I1 de H3+H5+H7). No es IEC/SEC.
+     Un CSV de 24 VDC del Gratten demuestra la cadena de archivos, NO H3/H5/H7.
+  5. Toda prueba con la KPS305D energizada: Ilim puesta ANTES de subir V,
+     pantalla, descarga comprobada (0 V en el Gratten y en el display),
+     y segunda persona con licencia clase A presente.
+  6. No toques archivos que el prompt no nombre, salvo tests que deban
+     acompañar el cambio.
+  7. En portadas, PDFs, memorias y Gantt: un solo autor, Andres Barbudo Rodriguez,
+     afiliación CFT Paillaco. Nada más en esa línea.
+  8. Verifica lo que cambies (pytest del módulo tocado, o lectura del PDF).
+     No declares listo sin evidencia de herramienta.
+
+Cuando termines un prompt, responde con:
+  - qué archivos creaste o editaste
+  - cómo lo verificaste
+  - si el criterio de listo se cumple (sí/no + qué falta)
+  - el ID del siguiente prompt recomendado
+----- hasta aquí (P00) -----
+
+
+================================================================================
+P02  |  F0 / F5.2  |  INVENTARIO REAL DEL PAÑOL
+Datos de placa ya pegados (fotos 21-ago-2026). Lo que no está fotografiado
+queda como “no aparece; no inventar”. No dejes que Grok “mejore” el modelo.
+Objetivo: material verdadero, no catálogo.
+================================================================================
+
+----- pega desde aquí (P02) -----
+Aplica P00.
+
+Crea docs/INVENTARIO_PANOL_CFT_PAILLACO.md con el inventario usable
+en el TPA. Usa EXACTAMENTE estos datos de campo (fotos 21-ago-2026).
+No sustituyas por un modelo “mejor” ni agregues una segunda fuente.
+
+  Fuente de banco (única fotografiada):
+    marca/modelo: wanptek KPS305D
+    placa: DC POWER SUPPLY  0–30 V  0–5 A
+    tensión de placa: 0–30 VDC (ajustable COARSE+FINE)
+    punto de trabajo TPA: 24,0 V
+    corriente máxima (placa): 0–5 A (ajustable COARSE+FINE)
+    modos: C.V. (tensión constante) y C.C. (corriente limitada) con LED
+    bornes: banana negro (−) / rojo (+)
+    aislada / no aislada: salida de banco de laboratorio; NO afirmar
+      aislamiento de seguridad clase II ni de convertidor. No puentear a red.
+    limitación de corriente: SÍ (modo C.C.)
+    techo físico: 30 V → esta fuente NO puede entregar 48 V
+    potencia de placa: 150 W máx. (a 24 V × 5 A = 120 W)
+
+  Fuente #2:
+    no aparece en las fotos de este lote. NO inventar marca/modelo.
+    El TPA se defiende con la KPS305D. Si aparece otra, se añade una
+    fila al inventario sin cambiar el alcance (sigue 24 V, no 48 V).
+
+  Osciloscopio (fotografiado):
+    marca/modelo: Gratten GA1102CAL
+    placa: GRATTEN · USB · GA1102CAL · 100 MHz · 1 GSa/s ·
+           DIGITAL STORAGE OSCILLOSCOPE
+    canales: 2 (CH1, CH2) + EXT trigger
+    ancho de banda: 100 MHz
+    muestreo: 1 GSa/s
+    USB Host frontal: sí (pendrive)
+    PRINT, SAVE/RECALL, AUTO, RUN/STOP, SINGLE, MATH, REF, MEASURE
+    exporta CSV: SÍ (CSV y bitmap a pendrive USB; el CSV sale del
+      scope hacia el pendrive, no se reimporta al scope)
+    formato de export: confirmar en el primer dump. Típico Gratten/Atten:
+      bloque de cabecera + Time, CH1[, CH2]. acquisition/parser.py acepta
+      ch1/channel1/c1 y salta filas no numéricas. No asumas 4 canales.
+
+  Sondas:
+    no aparecen en las fotos. NO afirmar diferencial ni de corriente.
+    Anotar: “pendiente de verificar 1x/10x pasivas el día del lab.
+    Si hay 10x, configurar atenuación en el Gratten (CH1 Probe).”
+
+  Carga resistiva o lámpara / reóstato:
+    no fotografiada. NO inventar valor. El unifilar mínimo debe caber
+    con “carga resistiva de pañol, P < 120 W, I < Ilim”. El día del
+    lab Andres anota ohmios o lámpara real en la bitácora.
+
+  Contactores, E-stop de seta, bornes, fusibles DC:
+    no fotografiados. NO los pongas como USABLE EN TPA si no están.
+    El corte de energía del ensayo live es el interruptor I/O de la
+    KPS305D + Ilim en C.C. Decláralo.
+
+  Generador de funciones:
+    no fotografiado. NO inventar. H3/H5/H7 se demuestran con
+    dsp/patterns.py (sintético). El Gratten no reemplaza al generador.
+
+El documento debe:
+  - Autor: Andres Barbudo Rodriguez. Institución: CFT Paillaco.
+  - Clasificar cada ítem: USABLE EN TPA / SOLO APOYO / NO USAR EN TPA /
+    NO FOTOGRAFIADO
+  - Prohibir explícitamente cualquier combinación que lleve a 380/400 V
+    y cualquier intento de “llegar a 48 V” (la KPS305D tope es 30 V)
+  - Proponer UN circuito mínimo de captura a 24 V (unifilar de 8 líneas
+    máximo) usando solo lo listado:
+      KPS305D (24,0 V, Ilim 0,50 A) → carga resistiva →
+      punta CH1 del Gratten GA1102CAL en los bornes de la fuente
+      (referencia en −). Sin puente MOSFET. Sin 3P+N.
+  - Listar qué CSV debe salir del Gratten para acquisition/parser.py:
+      Time, CH1  (y CH2 si se usa). En el import del Monitor, mapear
+      CH1 → va si es tensión de la fuente (NO dejarlo como ia por
+      el alias por defecto de ch1). Un DC ~24 V NO debe venderse
+      como prueba de H3/H5/H7; el DSP de armónicos sobre DC es
+      artefacto (no hay I1 senoidal).
+  - Una tabla “lo que este pañol NO permite” (700 A, 500 kW, 400 V,
+    48 V reales, 3P+N simultáneo, analizador certificado).
+  - Una subsección “qué SÍ se demuestra en vivo en el examen”
+    con los 6 puntos del bloque de instrumentos de este archivo.
+
+Actualiza docs/BANCO_FISICO_24V.md, docs/POWER_STAGE_24V.md y
+bench_package.py para que el BOM diga “Pañol CFT Paillaco” y nombre
+wanptek KPS305D + Gratten GA1102CAL. El HIL es 24 V / 120 W, mismos
+límites que la fuente. 48 V no es modelo de este TPA. Si el BOM
+todavía pide “fuente 24–48 V” o sondas diferenciales, cámbialo a
+lo fotografiado.
+
+Criterio de listo:
+  Inventario con wanptek KPS305D y Gratten GA1102CAL (no inventados).
+  Fuente #2, sondas y generador marcados no fotografiados.
+  Unifilar mínimo a 24 V con Ilim. bench_package y BANCO_FISICO ya
+  no piden 48 V reales ni equipo que no está. Autor = Andres Barbudo
+  Rodriguez, CFT Paillaco.
+----- hasta aquí (P02) -----
+
+
+================================================================================
+P03  |  F5.2  |  PAQUETE DEL BANCO 24 V ALINEADO AL PAÑOL
+Objetivo: 5.2 Vista Banco y paquete documental. Tres capas, sin mezclarlas.
+================================================================================
+
+----- pega desde aquí (P03) -----
+Aplica P00. Lee primero docs/INVENTARIO_PANOL_CFT_PAILLACO.md,
+docs/BANCO_FISICO_24V.md, bench_package.py, docs/POWER_STAGE_24V.md,
+docs/ALCANCE_TPA_CFT_PAILLACO.md y la vista Banco en
+templates/index.html + static/app.js.
+
+Deja el paquete del banco coherente en tres capas, sin mezclarlas:
+
+  A) Software SIL = 24 V / 120 W SIMULADOS (mismos límites que la KPS305D:
+     24 V, 5 A, techo 30 V, OV 29 V). physical_outputs_available = false.
+     La UI dice Banco 24 V, no 48 V.
+
+  B) Banco físico TPA = la misma 24 VDC: wanptek KPS305D + Gratten GA1102CAL.
+     Unifilar, riesgos, procedimiento y criterios A1–A5 ajustados a
+     lo fotografiado. Sin MOSFET de 400 V. Sin 500 kW. Sin 48 V.
+
+  C) Fuera de TPA: 48 V, MCU/PWM/puente, 400 V. Una sola frase.
+
+Trabajo:
+  1. Reescribir docs/BANCO_FISICO_24V.md con esas tres capas (24 V SIL,
+     24 V pañol, 48/400 V fuera).
+  2. Actualizar bench_package() para que GET /api/bench/package
+     exponga voltage_class 24 V, KPS305D, GA1102CAL y la prohibición
+     48 V / 400 V / 500 kW / ~700 A.
+  3. En la vista Banco 24 V, el bloque de pañol debe nombrar KPS305D +
+     GA1102CAL, no un puente de 400 V ni 48 V.
+  4. Añadir o ajustar tests/test_api.py para que el JSON del paquete
+     mencione 24 V, CFT Paillaco y la prohibición de 400 V.
+  5. Autor en el documento: Andres Barbudo Rodriguez, CFT Paillaco.
+
+No implementes GPIO. No conectes las fuentes desde Python.
+
+Criterio de listo:
+  pytest tests/test_api.py tests/test_power_stage.py pasa.
+  El markdown distingue SIL 24 V vs pañol 24 V vs 48/400 V fuera.
+----- hasta aquí (P03) -----
+
+
+================================================================================
+P04  |  F5.3  |  MATRIZ SIL: CRITERIO → TEST
+Objetivo: 5.3 criterios SIL trazables a código. NO escribas tests aún (eso es P05).
+================================================================================
+
+----- pega desde aquí (P04) -----
+Aplica P00. Lee power_stage/controller.py, tests/test_power_stage.py,
+docs/POWER_STAGE_24V.md, docs/BANCO_FISICO_24V.md y los A1–A5.
+
+Crea docs/MATRIZ_SIL_TPA.md con una tabla:
+
+  ID criterio | enunciado | archivo de test | estado (cubre / no cubre)
+              | evidencia que el TPA SÍ puede mostrar
+              | evidencia que el TPA NO puede mostrar
+
+Criterios mínimos a trazar:
+  A1 physical_outputs_available = false siempre
+  A2 E-stop y sobrecorriente enclavados, sin rearranque automático
+  A3 precarga ≥ 90 % de Vdc antes del contactor principal
+  A4 DSP se valida con señales patrón; THDi no es SEC
+  A5 pruebas energizadas con segunda persona clase A (esto es
+     procedimiento de laboratorio, no un assert de pytest: decláralo)
+  más: PWM no habilita antes de READY; timeout de precarga; shutdown
+  deja todas las salidas en false; el computador no puede anular E-stop.
+
+Si un criterio NO tiene test, NO lo inventes en la matriz como cubierto.
+Lista al final “tests que faltan” con el nombre de función propuesto.
+
+Autor: Andres Barbudo Rodriguez. Institución: CFT Paillaco.
+No escribas aún esos tests (eso es P05). No toques 400 V.
+
+Criterio de listo:
+  Cada fila de A1–A4 apunta a un test existente o dice “faltante”.
+  A5 queda como procedimiento de pañol, no como pytest.
+----- hasta aquí (P04) -----
+
+
+================================================================================
+P05  |  F5.3  |  COMPLETAR TESTS DEL BANCO SIL
+Objetivo: 5.3 tests de potencia simulada. Solo software. No GPIO. No 400 V.
+================================================================================
+
+----- pega desde aquí (P05) -----
+Aplica P00. Lee docs/MATRIZ_SIL_TPA.md y tests/test_power_stage.py.
+Implementa SOLO los tests marcados “faltante” que se puedan afirmar
+en software (no A5, no GPIO, no 400 V).
+
+Mínimo a cubrir si aún no existe:
+  - physical_outputs_available es false en POWER_OFF, RUN, ESTOP y FAULT
+  - no hay rearranque automático: tras OVERCURRENT, enable/start fallan
+    hasta reset_fault manual
+  - precarga llega a ≥ 90 % antes de READY (o timeout si tau es enorme)
+  - enable antes de READY sigue prohibido
+  - shutdown y estop dejan main, precharge, gate_enable y pwm en false
+  - inject_fault de DC_OVERVOLTAGE y OVERTEMPERATURE enclavan
+
+Mantén el estilo de tests/test_power_stage.py. Nombres en español
+en los assert de mensaje al usuario, inglés en nombres de test, como
+el archivo actual.
+
+Corre: pytest tests/test_power_stage.py tests/test_api.py
+Si algo del controlador hay que ajustar para que el criterio SIL sea
+cierto, ajústalo y explica el cambio. No agregues salidas físicas.
+
+Actualiza docs/MATRIZ_SIL_TPA.md a “cubre” en las filas que ahora
+tienen test.
+
+Criterio de listo:
+  pytest de esos dos archivos en verde. Matriz SIL actualizada a “cubre”
+  en las filas que ahora tienen test.
+----- hasta aquí (P05) -----
+
+
+================================================================================
+P06  |  F4.2 / F5 / A5  |  PIPELINE SCOPE 24 V + PROTOCOLO + BITÁCORA
+Objetivo: procedimiento imprimible y plantilla de evidencia. No hace falta
+correr el dashboard. Un CSV de ejemplo corto, no un dump de millones de líneas.
+================================================================================
+
+----- pega desde aquí (P06) -----
+Aplica P00. Lee acquisition/parser.py, acquisition/pipeline.py,
+tests/test_acquisition.py, dsp/patterns.py, docs/INVENTARIO_PANOL_CFT_PAILLACO.md
+(si existe) y docs/ALCANCE_TPA_CFT_PAILLACO.md.
+
+El ensayo de laboratorio del TPA es este, no un AHF de 400 V:
+
+  wanptek KPS305D (24,0 V, Ilim 0,50 A, modo C.V.)
+  → carga resistiva de pañol
+  → Gratten GA1102CAL CH1 en bornes de la fuente (DC, 5 V/div, Probe 1x o 10x)
+  → SAVE/RECALL → CSV a pendrive USB
+  → Monitor AHF importa (mapear CH1 → va) y el DSP calcula
+  → se compara contra lo que se SABE (display de la KPS305D ≈ Mean del Gratten),
+    no contra IEC
+
+  Generador de funciones: NO fotografiado. No lo uses en el procedimiento
+  como si existiera. H3/H5/H7 = dsp/patterns.py (SINTÉTICO).
+
+Trabajo (solo estos archivos):
+
+  1. docs/PROCEDIMIENTO_SCOPE_24V.md
+     Paso a paso CFT Paillaco con ESTOS aparatos (nómbralos):
+       Fuente: wanptek KPS305D. ANTES de I: Ilim = 0,50 A (COARSE+FINE de A),
+       luego V = 24,0 V. LED C.V. esperado; si enciende C.C., la carga pide
+       más que Ilim — eso es la salvaguarda, no un fallo del TPA.
+       Scope: Gratten GA1102CAL. CH1 DC, 5 V/div, base 5 ms/div (DC plano)
+       o CH1 AC 50 mV/div / 10 µs/div si se quiere mostrar rizado de la
+       fuente conmutada. AUTO (azul) si Andres se pierde en el examen.
+       MEASURE: Mean, Vmax, Vmin. Trigger AUTO (un DC no necesita flanco).
+       Export: pendrive en USB Host frontal → SAVE/RECALL → tipo CSV → Save.
+       BMP/PRINT como foto de evidencia de la pantalla.
+       Import: http://localhost:8080 Monitor AHF. Mapear CH1 → va
+       (el alias por defecto de ch1 en parser.py es ia: no dejarlo así).
+     Seguridad: clase A presente si la KPS305D está en I. Corte = switch
+     I/O de la fuente. Comprobar 0 V en display y en el Gratten.
+     Si la señal es DC de 24 V, declara qué puede y qué NO puede
+     demostrar el DSP (un DC no prueba H3/H5/H7; un THDi alto sobre DC
+     es artefacto). H3/H5/H7 = dsp/patterns.py. Sé honesto con el pañol.
+     Incluye un ejemplo de CSV mínimo estilo Gratten (cabecera + Time,CH1)
+     compatible con parse_csv.
+
+  2. Un CSV de ejemplo “pañol 24 V” en acquisition/ (pocas líneas)
+     y un test en tests/test_acquisition.py que lo parsee.
+
+  3. Una tabla “señal inyectada | qué debe reportar el DSP | tolerancia”.
+     Si el pañol no puede inyectar H3, esa fila se llena con el patrón
+     sintético y se etiqueta SINTÉTICO.
+
+  4. docs/PROTOCOLO_SEGURIDAD_24V.md
+     Alcance: solo 24 VDC con la wanptek KPS305D. Prohibido 380/400 V
+     en la primera página. Prohibido 48 V (esta fuente topea a 30 V).
+     Segunda persona: profesional licencia clase A, nombre en blanco.
+     Lista pre-energía (10 ítems máximo), con Ilim ANTES de subir V.
+     Quién corta: switch I/O de la KPS305D. Cómo se comprueba 0 V:
+     display de la fuente + Mean del Gratten.
+     Prohibido: puente a red, “subir a 48 V”, dejar la KPS305D en I
+     sin vigilancia, usar el Gratten como si fuera analizador de red.
+     Fotos: setup, placa wanptek KPS305D, placa Gratten GA1102CAL,
+     pantalla del scope (Mean ≈ 24 V), dashboard con CSV importado.
+     Sin selfies.
+
+  5. docs/BITACORA_LABORATORIO_TPA.md
+     Tabla: fecha, hora, asistente clase A,
+     fuente (wanptek KPS305D, Vset, Ilim, modo C.V./C.C.),
+     scope (Gratten GA1102CAL, V/div, acoplamiento, Probe 1x/10x),
+     archivo CSV, fs, esperado (Mean ≈ 24 V), salido, THDi académico
+     si aplica (N/A en DC), desviación, firma de ambos.
+     Tres filas vacías y UNA fila de ejemplo sintético
+     (patrón combined_it de config_industrial.yaml).
+
+Autor en los tres markdown: Andres Barbudo Rodriguez, CFT Paillaco.
+No pidas 700 A. No uses 400 V. No presentes esto como ensayo SEC.
+
+Criterio de listo:
+  Los tres markdown existen. pytest tests/test_acquisition.py pasa.
+  El procedimiento dice cuándo el DSP se valida con patrón sintético
+  y cuándo con CSV real. El protocolo prohíbe 400 V en la primera página.
+  La bitácora tiene campos de CSV y de segunda persona.
+----- hasta aquí (P06) -----
+
+
+================================================================================
+P07  |  F6.1 / M6  |  REGRESIÓN + CARPETA DE EVIDENCIAS
+Objetivo: suite verde y output/tpa/ con índice. No Docker. No dashboard.
+================================================================================
+
+----- pega desde aquí (P07) -----
+Aplica P00.
+
+Corre toda la suite, sin Docker:
+
+  pytest tests tan_telecom/tests -q
+
+Si algo falla, arréglalo con el cambio mínimo. No refactors.
+
+Luego:
+
+  1. Crea tests/test_tpa_smoke.py que, en un solo módulo, verifique
+     el “camino de defensa”:
+       - un patrón DSP produce THDi > 0
+       - /api/runtime es hil y hardware hil_simulation
+       - /api/bench/package tiene voltage_class con 24
+       - physical_outputs_available is False en un snapshot RUN
+         (arranca el controlador, start, enable, lee el flag)
+       - un diseño TAN pequeño (ejemplo small) no explota
+
+  2. Crea output/tpa/ con README índice de entrega (qué archivo, qué
+     prueba, fecha). Genera o copia:
+       - log de pytest en output/tpa/pytest.txt
+       - un PDF o HTML TAN de ejemplo (si ya hay en output/web/, copia
+         uno y declara origen; no regeneres si el CLI pide dependencias
+         pesadas que fallen)
+       - enlaces relativos a:
+           docs/ALCANCE_TPA_CFT_PAILLACO.md
+           docs/MATRIZ_SIL_TPA.md
+           docs/INFORME_EVIDENCIAS_TPA.md  (puede no existir aún: anótalo
+           como pendiente de P08)
+           docs/BITACORA_LABORATORIO_TPA.md
+       - un caso TAN small hacia output/tpa/ si el CLI lo permite sin
+         romper output/web/
+
+  3. Receta corta en docs/EVIDENCIAS_TPA.md sección 1: comando exacto
+     de pytest y que se debe archivar la salida.
+
+No subas dumps de osciloscopio de cientos de MB. Nada en output/tpa/
+afirme un ensayo de 400 V.
+
+Criterio de listo:
+  pytest tests tan_telecom/tests -q en verde, incluido test_tpa_smoke.
+  output/tpa/README.md lista cada evidencia. pytest.txt existe.
+----- hasta aquí (P07) -----
+
+
+================================================================================
+P08  |  F6.1 / F6.2  |  CASOS DE DEMOSTRACIÓN + INFORME DE EVIDENCIAS
+Objetivo: qué dice Andres en la defensa, y el informe que va a la memoria.
+NO inventes resultados de laboratorio que no estén en la bitácora.
+================================================================================
+
+----- pega desde aquí (P08) -----
+Aplica P00. Lee el alcance, la matriz SIL, los tests y output/tpa/ si existe.
+
+1) docs/CASOS_DEMO_DEFENSA.md
+   Tres casos, sin Docker:
+
+   CASO A — Patrón sintético combined_it (config_industrial.yaml)
+     Qué muestra: Monitor AHF, PLL ~50 Hz, THDi académico, H3/H5/H7.
+     Cómo arrancar: python hil_app.py
+     Qué NO decir: “medimos la red del CFT”.
+
+   CASO B — Diseño TAN (ejemplo medium o small)
+     Qué muestra: Icw/Icc, calentamiento, XL3, Excel/PDF.
+     Comando tan_telecom. Qué NO decir: “este tablero está construido”.
+
+   CASO C — Banco SIL 24 V (simulado, mismos límites que la KPS305D)
+     Qué muestra: POWER_OFF → SELF_TEST → PRECHARGE → READY → RUN,
+     E-stop enclavado, physical_outputs_available false,
+     source_v = 24 V, techo 30 V, 5 A / 120 W.
+     Qué NO decir: “el software energiza la KPS305D”, “hay 48 V”.
+
+   CASO D — LIVE pañol, examen de título
+     Instrumentos: wanptek KPS305D + Gratten GA1102CAL.
+     Solo si hay clase A presente y la defensa es en pañol (o se
+     pueden llevar los dos aparatos). Si la comisión está en aula
+     sin energía, este caso pasa a FOTOS + CSV de ensayo previo
+     y no se energiza.
+     Qué muestra (4–6 min):
+       - placas: 0–30 V / 0–5 A  y  100 MHz 2 ch 1 GSa/s
+       - 24,0 V C.V., Ilim 0,50 A; opcional: bajar Ilim y ver LED C.C.
+       - CH1 Mean ≈ 24 V vs display de la fuente
+       - SAVE CSV USB → import Monitor (mapear CH1 → va)
+     Qué NO decir: “medimos la red del CFT”, “esto prueba H3”,
+     “esta fuente alimenta el AHF”, “el scope es analizador”.
+     Fallback si el USB falla: BMP/PRINT de la pantalla del Gratten
+     + el DSP sigue siendo el patrón sintético del CASO A.
+     El guion minuto a minuto lo escribe P16; aquí basta el caso
+     y las prohibiciones de overclaim.
+
+   Para cada caso: 5 viñetas de narración oral, captura sugerida, y una
+   pregunta trampa del profesor con la respuesta correcta.
+   CASO D además: 3 fallos posibles (CSV no abre, Ilim en C.C. sin querer,
+   Probe 10x mal configurado) con la frase que Andres dice.
+
+2) docs/INFORME_EVIDENCIAS_TPA.md (6–10 páginas equivalentes, markdown
+   limpio para pasar luego a la memoria).
+
+   Capítulos:
+     1. Identificación (autor Andres Barbudo Rodriguez, CFT Paillaco).
+     2. Método: señal patrón → cálculo auditable → lógica segura.
+     3. Evidencia DSP (tests/test_dsp.py: patrones, tolerancia 12 %).
+     4. Evidencia TAN (tests de calculations/rules + un PDF generado).
+     5. Evidencia SIL (matriz + test_power_stage).
+     6. Evidencia de pañol 24 V (KPS305D + GA1102CAL): si hay CSV real
+        del Gratten, úsalo y declara que es DC / cadena de archivos, no
+        H3. Si no, declara “pendiente de campaña” y muestra el
+        procedimiento P06 como capacidad, no como ensayo ejecutado.
+     7. Límites declarados (lista de 10 ítems, tono de ingeniero).
+     8. Trazabilidad requisito → archivo → test.
+
+   Al final, tabla “afirmación / se puede decir en la defensa / está
+   prohibido decir”.
+
+El informe no afirma 400 V, no afirma certificación SEC, no afirma
+hard real-time. Cita archivos reales del repo. Cada caso demo tiene
+una prohibición explícita de overclaim.
+
+Criterio de listo:
+  Los dos markdown existen. Comandos de los casos corren en este repo.
+  El informe no afirma ensayo 400 V ni SEC ni hard real-time.
+----- hasta aquí (P08) -----
+
+
+================================================================================
+P09  |  F7.1  |  ESQUELETO DE MEMORIA + CAPÍTULO 1
+Objetivo: arranque de memoria. Capítulos cortos de CFT, no tesis.
+================================================================================
+
+----- pega desde aquí (P09) -----
+Aplica P00. Crea docs/memoria/ con:
+
+  00_portada.md
+      Autor: Andres Barbudo Rodriguez
+      Institución: CFT Paillaco
+      Título del TPA, año 2026, un solo autor.
+      Nada más en la línea de autor.
+
+  01_indice.md
+
+  README.md
+      Cómo se ensamblan los capítulos (orden, qué prompt genera cada uno).
+
+  02_capitulo_01_planteamiento.md
+      Usa docs/ALCANCE_TPA_CFT_PAILLACO.md. Primera persona profesional
+      (este TPA, este pañol, este CFT), no marketing Snocomm.
+      Incluye:
+        - problema de armónicos 3P+N en tableros BT / nodos telecom
+        - por qué un CFT puede aproximarlo con cálculo + SIL + 24 V
+        - por qué NO se hace el ensayo de 500 kW / 400 V (no hay banco
+          de ~700 A; no es cobardía, es medio de prueba)
+        - objetivos generales y específicos medibles con el repo
+        - hipótesis: si el DSP sigue a la señal patrón dentro de la
+          tolerancia de tests/test_dsp.py y la FSM no rearma sola,
+          el TPA cumple
+      Máximo ~1500 palabras. Citas solo normas que el proyecto usa.
+
+Índice obligatorio:
+
+  1. Planteamiento y alcance
+  2. Marco normativo usado (IEC 61439, RIC citado donde el código lo usa,
+     IEC 62477-1 como referencia de convertidores — y qué NO se ensayó)
+  3. Arquitectura del software de borde
+  4. Preingeniería TAN
+  5. DSP 3P+N sobre señales patrón
+  6. SIL del banco y aproximación 24 V en pañol
+  7. Evidencias, límites y conclusiones
+  8. Anexos (Gantt, inventario, bitácora, matriz SIL)
+
+Prohibido capítulo de “producto 50–100 A / 400 V”. Si aparece, va a un
+anexo titulado “trabajo futuro, fuera de este TPA”.
+
+Criterio de listo:
+  Portada con el nombre legal y solo CFT Paillaco.
+  Índice sin 400 V como objetivo.
+  Capítulo 1 nombra CFT Paillaco, 24 V, clase A, y rechaza 400 V como
+  medio de prueba de ESTE TPA.
+----- hasta aquí (P09) -----
+
+
+================================================================================
+P10  |  F7.1  |  MEMORIA CAPÍTULOS 2–4 (CORTOS)
+Objetivo: norma, arquitectura y TAN. Cada capítulo 5–8 minutos de lectura.
+No inflar. Números reales, no redondos inventados.
+================================================================================
+
+----- pega desde aquí (P10) -----
+Aplica P00. Escribe tres capítulos cortos. No toques código.
+
+  docs/memoria/03_capitulo_02_marco_normativo.md
+    Sé literal. Abre tan_telecom/rules.py, calculations.py, validators.py
+    y docs/PRODUCT_ROADMAP_CHILE.md. Lista:
+      - IEC 61439-1/2: qué calcula el código y qué NO (ensayo de tablero,
+        certificación)
+      - RIC (solo párrafos que el código o las memorias TAN citan)
+      - IEC 62477-1, ISO 13850 / E-stop: CRITERIO DE DISEÑO del SIL,
+        no certificado
+      - IEC 61000: fuera de alcance de medición
+    Tabla “requisito normativo | cómo lo trata este TPA | vacío”.
+    Ninguna frase del tipo “el equipo cumple IEC…”. Solo “el cálculo
+    aplica la regla X”.
+
+  docs/memoria/04_capitulo_03_arquitectura.md
+    Tres procesos, shared memory, hil_app.py vs main_industrial.py,
+    Docker opcional, y por qué Python no es hard real-time (frase del
+    README). Diagrama ASCII DAQ → DSP → supervisory. Modbus TLS e
+    Influx como capacidad SCADA, no como requisito para defender
+    (se defiende con python hil_app.py).
+
+  docs/memoria/05_capitulo_04_tan.md
+    TAN-Telecom como preingeniería para nodos telecom: entradas, reglas,
+    salidas (Excel, PDF, BOM, JSON). Toma UN caso generado en output/
+    (small o medium) y comenta los números: corrientes, Icw, forma,
+    advertencias RIC. Deja claro que no se construyó el tablero.
+    Números reales del artefacto, no inventados.
+
+Autor: Andres Barbudo Rodriguez, CFT Paillaco.
+
+Criterio de listo:
+  Los tres archivos existen. Cero frases “el equipo cumple IEC”.
+  El lector de CFT entiende cómo arrancar la demo sin Docker.
+  El capítulo TAN cita números de un artefacto real del repo.
+----- hasta aquí (P10) -----
+
+
+================================================================================
+P11  |  F7.1  |  MEMORIA CAPÍTULOS 5–6  DSP + SIL 24 V
+Objetivo: el profesor de electricidad sigue el argumento sin leer el código.
+================================================================================
+
+----- pega desde aquí (P11) -----
+Aplica P00. Escribe:
+
+  docs/memoria/06_capitulo_05_dsp.md
+    Nivel CFT, sin teatro de paper IEEE:
+      - por qué 3P+N y secuencia cero (H3 en neutro)
+      - Clarke αβ0
+      - PLL sobre tensión del PCC, no sobre corriente
+      - extracción H3 (cero), H5 (negativa), H7 (positiva)
+      - THDi = Ih/I1 académico
+      - tolerancia REL_TOL = 0.12 en tests/test_dsp.py
+      - CSV del Gratten GA1102CAL como campaña de archivos, no como
+        analizador certificado. 2 canales: no hay 3P+N simultáneo.
+    Tabla de patrones del catálogo y qué verifica cada uno.
+    Si hay CSV de pañol 24 V (KPS305D + GA1102CAL), una subsección
+    que diga Mean ≈ 24 V y que el THDi sobre DC no cuenta; si no,
+    “campaña física pendiente / procedimiento listo”.
+
+  docs/memoria/07_capitulo_06_sil_24v.md
+    Primer párrafo: el TPA es 24 V, no 48 V ni 400 V. Tres capas:
+    HIL 24 V / 120 W, pañol 24 V (wanptek KPS305D + Gratten GA1102CAL),
+    48 V y 400 V fuera. La KPS305D topea a 30 V: por eso no se modela
+    48 V. FSM POWER_OFF → … → RUN. E-stop,
+    latch, precarga 90 %, el computador no manda el corte. Ensayo o
+    procedimiento con la KPS305D y el Gratten (Ilim, CH1 Mean, CSV USB).
+    Segunda persona clase A como requisito de A5, no como adorno.
+    El capítulo no se puede malinterpretar como “construimos el inversor”.
+
+Autor: Andres Barbudo Rodriguez, CFT Paillaco.
+
+Criterio de listo:
+  El 12 % de tolerancia está declarado.
+  La prohibición de 400 V está en el primer párrafo del cap. 6.
+  Un profesor de electricidad puede seguir ambos capítulos.
+----- hasta aquí (P11) -----
+
+
+================================================================================
+P12  |  F7.1 / M7  |  CONCLUSIONES + MEMORIA ÚNICA
+Objetivo: un markdown que se lee de corrido. PDF simple si se puede.
+================================================================================
+
+----- pega desde aquí (P12) -----
+Aplica P00. Escribe:
+
+  docs/memoria/08_capitulo_07_conclusiones.md
+    5 logros medibles, 5 límites, 3 trabajos futuros FUERA de este TPA
+    (uno puede ser MCU/PWM sobre 24 V si hay hardware; uno NO debe venderse como
+    “el siguiente paso es 500 kW en el CFT”).
+
+  docs/memoria/09_anexos.md
+    Lista de anexos con ruta de archivo (Gantt, inventario, bitácora,
+    matriz SIL, alcance, informe de evidencias).
+
+Luego ensambla una memoria única:
+
+  docs/memoria/MEMORIA_TPA.md
+
+concatenando portada, índice y capítulos 1–7 + anexos.
+
+Si puedes generar también un PDF simple (reportlab o similar) en
+docs/memoria/MEMORIA_TPA.pdf, hazlo. Si las dependencias fallan, deja
+solo el markdown y decláralo: no instales paquetes pesados.
+
+Portada: un autor, Andres Barbudo Rodriguez, CFT Paillaco, 2026.
+Nada más en esa línea. Verifica con grep que no hay segundo autor.
+
+Criterio de listo:
+  MEMORIA_TPA.md existe y se puede leer de corrido.
+  El nombre legal aparece en la portada y no aparece un segundo autor.
+----- hasta aquí (P12) -----
+
+
+================================================================================
+P13  |  F7.3  |  PRESENTACIÓN DE DEFENSA (12–15 LÁMINAS)
+Objetivo: PPTX de defensa. Usa la skill pptx. No más de 15 láminas.
+================================================================================
+
+----- pega desde aquí (P13) -----
+Aplica P00. Usa la skill de presentaciones (pptx). Genera
+docs/memoria/DEFENSA_TPA.pptx.
+
+Autor en portada: Andres Barbudo Rodriguez.
+Institución: CFT Paillaco.
+Nada más en esa línea.
+Paleta sobria (puede seguir ink/gold/indigo del dashboard).
+
+Láminas sugeridas (no más de 15):
+  1. Portada
+  2. Problema (armónicos 3P+N)
+  3. Alcance: qué sí / qué no (aquí la lámina de 400 V PROHIBIDO
+     como medio de prueba de este TPA)
+  4. Medios reales: wanptek KPS305D (0–30 V / 0–5 A, punto 24 V) +
+     Gratten GA1102CAL (100 MHz, 2 ch, 1 GSa/s, USB CSV) + clase A.
+     Una línea: el TPA es 24 V; 48 V no cabe en la KPS305D.
+  5. Arquitectura software
+  6. TAN en un número
+  7. DSP en un número (THDi académico, tolerancia)
+  8. Demo Monitor (patrón sintético = H3/H5/H7)
+  9. Demo Banco SIL (FSM + false outputs)
+  10. Demo live pañol (CASO D): 24,0 V, Ilim, CH1 Mean, CSV USB.
+      Si la defensa es en aula, foto de placas + pantalla del Gratten.
+  11. Evidencias (tests)
+  12. Límites declarados
+  13. Conclusión y trabajo futuro
+  14. Cierre
+
+Notas del orador en cada lámina (lo que Andres lee, 40–50 s).
+Nada de 500 kW como logro.
+
+Criterio de listo:
+  El PPTX se genera. Portada con un solo autor y CFT Paillaco.
+  Una lámina dice explícitamente que no hubo ensayo 400 V.
+----- hasta aquí (P13) -----
+
+
+================================================================================
+P14  |  F7.3  |  BANCO DE PREGUNTAS DE DEFENSA
+Objetivo: 20 respuestas que Andres pueda memorizar. Tono de técnico de CFT.
+================================================================================
+
+----- pega desde aquí (P14) -----
+Aplica P00. Escribe docs/memoria/PREGUNTAS_DEFENSA.md
+
+20 preguntas con respuesta corta (8–12 líneas). Obligatorias:
+
+  - ¿Por qué no ensayaste a 400 V si tu licencia es clase A?
+  - ¿Ese THDi sirve para la SEC?
+  - ¿El Raspberry / PC genera el PWM?
+  - ¿Python es tiempo real?
+  - ¿Construiste el tablero TAN?
+  - ¿El banco de 24 V está energizado por este software?
+  - ¿Qué prueba el CSV del Gratten GA1102CAL y qué no?
+  - ¿Por qué el TPA no es 48 V? (KPS305D topea a 30 V)
+  - ¿El Gratten es un analizador de red?
+  - ¿Puedes ver H3 en el scope con 24 VDC?
+  - ¿Qué haces si el pendrive no monta el CSV en el examen?
+  - ¿Qué pasa si alguien da enable en FAULT?
+  - ¿Dónde está el E-stop, en software o en cable?
+  - ¿Qué norma usaste de verdad en el código?
+  - ¿Por qué H3 en el neutro?
+  - ¿Qué harías si mañana aparece un analizador certificado?
+  - ¿Este software se puede vender como AHF?
+
+Respuestas honestas, tono de técnico de CFT, no de brochure.
+La de 400 V / clase A no contradice docs/ALCANCE_TPA_CFT_PAILLACO.md.
+Autor: Andres Barbudo Rodriguez, CFT Paillaco.
+
+Criterio de listo:
+  20 preguntas. La de 400 V / clase A está respondida sin
+  contradecir el alcance.
+----- hasta aquí (P14) -----
+
+
+================================================================================
+P15  |  CIERRE  |  NUEVA CARTA GANTT
+Objetivo: reprogramar con lo YA hecho. No uses las fechas viejas como dogma.
+Solo después de P02–P14.
+================================================================================
+
+----- pega desde aquí (P15) -----
+Aplica P00.
+
+NO uses las fechas de la carta anterior como dogma. Recorre el repo
+(docs/memoria, tests, output/tpa, bitácora si tiene filas reales) y
+reconstruye la carta Gantt.
+
+Autor único: Andres Barbudo Rodriguez.
+Institución: CFT Paillaco.
+Pañol: wanptek KPS305D (0–30 V / 0–5 A, punto 24 V) + Gratten GA1102CAL
+(100 MHz, 2 ch, 1 GSa/s). Prohibido 400 V / 500 kW / ~700 A. 48 V no es
+físico (tope 30 V).
+
+Regenera, con el generador existente docs/build_gantt_tpa.py o uno
+nuevo si hace falta:
+
+  docs/CARTA_GANTT_TPA.pdf
+  docs/CARTA_GANTT_TPA.csv
+  docs/CARTA_GANTT_TPA.md
+
+La nueva carta debe:
+  - marcar como 100 % lo que estos prompts dejaron hecho
+  - dejar pendientes SOLO lo que siga vacío (campaña CSV real,
+    revisión del guía, fecha de defensa)
+  - fecha de estado = hoy
+  - horizonte hasta la defensa real (si no hay fecha en el repo,
+    mantén 04-dic-2026 y decláralo supuesto)
+  - un solo autor en la portada, afiliación solo CFT Paillaco
+  - una fila de “campaña pañol 24 V (KPS305D + GA1102CAL)” junto al
+    HIL 24 V / 120 W (misma tensión; el HIL no energiza la fuente)
+  - una fila de “ensayo demo live examen” (P16) en noviembre si la
+    defensa admite instrumentos en sala o pañol
+  - ninguna actividad de 400 V / 500 kW / ~700 A dentro del TPA
+
+Criterio de listo:
+  PDF A3 de 3 láminas, autor legal correcto, sin segundo autor,
+  sin 400 V como actividad del TPA.
+----- hasta aquí (P15) -----
+
+
+================================================================================
+P16  |  DEFENSA  |  GUION DEMO LIVE — EXAMEN DE TÍTULO
+Objetivo: lo que Andres hace con las manos y dice en voz alta con la
+wanptek KPS305D y el Gratten GA1102CAL. No energiza Grok nada.
+Hacerlo cuando P08 exista. Noviembre, ensayo oral.
+================================================================================
+
+----- pega desde aquí (P16) -----
+Aplica P00. Lee docs/CASOS_DEMO_DEFENSA.md (si existe),
+docs/PROCEDIMIENTO_SCOPE_24V.md, docs/PROTOCOLO_SEGURIDAD_24V.md,
+docs/INVENTARIO_PANOL_CFT_PAILLACO.md y docs/ALCANCE_TPA_CFT_PAILLACO.md.
+
+Escribe docs/DEMO_LIVE_EXAMEN.md — guion de defensa con instrumentos
+reales. Autor: Andres Barbudo Rodriguez. Institución: CFT Paillaco.
+
+Instrumentos (no sustituir, no agregar un modelo “mejor”):
+  - wanptek KPS305D, 0–30 V / 0–5 A, C.V./C.C., COARSE+FINE, bornes ±
+  - Gratten GA1102CAL, 100 MHz, 1 GSa/s, 2 canales, USB Host, PRINT
+
+Dos sedes, Andres elige el día anterior según dónde se siente la comisión:
+
+  SEDE A — Pañol o sala con 230 VAC de pared y mesa.
+    Se energiza la KPS305D. Clase A presente. CASO D completo.
+
+  SEDE B — Aula sin banco.
+    NO se energiza. Se muestran placas (fotos), pantalla del Gratten
+    (BMP/foto) y, si hay, un CSV ya importado. El DSP sigue siendo
+    CASO A (sintético). Decláralo al empezar: “hoy no hay 24 V vivos”.
+
+Estructura del documento:
+
+  1. Checklist de la noche anterior (12 ítems máx.)
+     hil_app.py arranca, pendrive FAT32 en el Gratten, Ilim preset
+     0,50 A, V preset 24,0 V, switch de la KPS305D en O, carga
+     resistiva < 120 W, punta CH1, clase A confirmada para sede A,
+     fotos de placa de respaldo, CSV de ensayo previo en el laptop.
+
+  2. Ajustes de fábrica del día (tabla, no prosa):
+
+       KPS305D     | Ilim 0,50 A PRIMERO | V 24,0 V | switch O
+                   | LED esperado C.V. al energizar con carga liviana
+       Gratten     | CH1 ON, CH2 OFF
+                   | Coupling DC, 5 V/div, Probe 1x o 10x (el que haya;
+                   |   si 10x, menú Probe = 10x)
+                   | Time 5 ms/div, Trigger AUTO
+                   | MEASURE: Mean, Vmax, Vmin
+                   | USB insertado ANTES de SAVE
+       Laptop      | python hil_app.py → Monitor AHF en patrón sintético
+                   | carpeta lista para pegar el CSV
+
+  3. Guion minuto a minuto de la defensa (total ~20 min):
+
+       0:00–1:00   portada, alcance (400 V fuera)
+       1:00–8:00   CASOS A–C software (Monitor, TAN, SIL). Sin energía.
+       8:00–13:00  CASO D live o fotos, según sede.
+       13:00–15:00 límites + cierre
+       15:00–     preguntas
+
+     Del tramo 8:00–13:00 escribe DOS columnas:
+       “Andres dice” (frase textual, 40–50 s por paso)
+       “Andres hace” (manos: switch, knobs, AUTO, SAVE, import)
+
+     Pasos vivos en sede A, en este orden:
+       a. Mostrar placas: “KPS305D 0–30 V 0–5 A; GA1102CAL 100 MHz 2 ch.”
+       b. “Punto de trabajo 24,0 V. Esta fuente no llega a 48 V.”
+       c. Clase A a la vista. Ilim 0,50 A. V 24,0 V. Switch I.
+       d. Display V ≈ 24,0 y LED C.V. Gratten CH1 Mean ≈ 24 V.
+       e. (Opcional, 20 s) bajar Ilim hasta C.C.: “así se limita corriente.”
+          Volver a 0,50 A / C.V. No hacer cortocircuito a propósito.
+       f. SAVE/RECALL → CSV a USB → import Monitor, mapear CH1 → va.
+       g. Frase obligatoria: “Esto demuestra la cadena fuente–scope–CSV–
+          software. No demuestra H3 ni la red del CFT.”
+       h. Switch O. Comprobar 0 V en fuente y en el Gratten.
+
+  4. Qué NO decir (tabla, 10 filas). Incluye:
+       “medimos armónicos”, “el AHF está compensando”, “48 V reales”,
+       “el Gratten es clase A de medición”, “Python es tiempo real”,
+       “este THDi sirve para la SEC”.
+
+  5. Fallos y frase de recuperación (obligatorio):
+       - Pendrive no monta / CSV no abre → BMP PRINT + CASO A.
+       - Probe 10x y la traza se ve a 2,4 V → “atenuación, corrijo Probe.”
+       - LED C.C. al energizar → “Ilim menor que la carga; subo Ilim o
+         alivio carga. No es un AHF en falla.”
+       - hil_app.py caído → pytest + captura de pantalla previa.
+       - Comisión pide 400 V → frase del alcance congelado, no improvisar.
+
+  6. Fotos mínimas de evidencia (sin selfies): placa KPS305D, placa
+     GA1102CAL, display 24,0 V C.V., pantalla Gratten con Mean, dashboard
+     con CSV importado, bitácora firmada.
+
+No pidas generador de funciones. No pidas segunda fuente. No pidas
+sonda diferencial. No diseñes un puente. No conectes la KPS305D desde
+Python. physical_outputs_available sigue en false.
+
+Criterio de listo:
+  docs/DEMO_LIVE_EXAMEN.md existe. Sede A y sede B. Guion con frases
+  textuales. Los dos instrumentos están nombrados con placa. Hay frase
+  obligatoria de que el CSV no prueba H3. Hay fallback USB.
+----- hasta aquí (P16) -----
+
+
+================================================================================
+NOTAS PARA ANDRES (no se las pegues a Grok)
+================================================================================
+
+Orden si una semana se cae (mínimo para defender):
+
+  Imprescindibles:  P03 P04 P05 P07 P08 P09 P11 P12 P13 P14 P15
+  Importantes:      P02 P06 P10 P16
+  P01 ya está hecho.
+  P16 es el guion de manos del examen; no sustituye a P08.
+
+Sobre P02:
+  Las placas de la wanptek KPS305D y del Gratten GA1102CAL YA están
+  en este archivo (fotos 21-ago-2026). Pégalo. Sondas, carga y una
+  eventual segunda fuente se anotan “no fotografiado” — no las inventes
+  el sábado. Si las encuentras, una fila más en el inventario, nada más.
+
+Sobre el laboratorio físico:
+  P06 deja el procedimiento listo aunque todavía no captures el CSV.
+  La defensa se sostiene con patrones sintéticos + SIL.
+  El CSV de la KPS305D + Gratten es un PLUS: prueba la cadena de
+  archivos (Mean ≈ 24 V), NO H3/H5/H7. Un DC de 24 V NO demuestra
+  armónicos. No hay generador de funciones fotografiado: no lo esperes
+  para el examen.
+  P16 es el ensayo oral con los dos aparatos. Decide sede A (pañol,
+  clase A, 24 V vivos) o sede B (aula, fotos) el día anterior.
+
+Ajustes que debes memorizar (no hace falta Grok):
+  KPS305D: Ilim 0,50 A PRIMERO, luego 24,0 V, switch I, LED C.V.
+  Gratten: CH1 DC 5 V/div, 5 ms/div, AUTO, MEASURE Mean, SAVE CSV USB.
+  Frase: “cadena fuente–scope–CSV, no H3, no red del CFT, no 48 V.”
+
+Sobre la licencia clase A:
+  Habilita trabajos de BT. No reemplaza el banco de ~700 A, ni la
+  conformidad de producto, ni un analizador certificado.
+  Medio de prueba ≠ habilitación legal.
+
+Cómo pegar, cada sesión:
+
+  Chat nuevo → P00 → un bloque “pega desde aquí (Pxx)” → esperas →
+  miras el diff y el criterio de listo → marcas la X arriba → cierras
+  el chat.
+
+No dejes 16 chats abiertos: saturan la máquina. Un chat, un prompt,
+cierra.
+================================================================================

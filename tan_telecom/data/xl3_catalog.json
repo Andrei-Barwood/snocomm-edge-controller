@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "fuente": "Referencia constructiva familia XL³ / documentación Legrand IEC 61439 (valores tipificados para uso académico)",
+    "norma": "IEC 61439-1 & 2",
+    "notas": "Datos orientativos de predimensionamiento; no sustituyen catálogo oficial ni ensayos de tipo."
+  },
+  "envolventes": [
+    {
+      "codigo": "XL3-160",
+      "nombre": "XL³ 160",
+      "corriente_max_a": 160,
+      "icw_ka": 25,
+      "icc_ka": 25,
+      "ip_disponibles": [30, 40, 43, 55],
+      "dimensiones_mm": {
+        "ancho_tipico": 575,
+        "alto_tipico": 1050,
+        "fondo_tipico": 175,
+        "modulos_referencia": "mural / suelo compacto"
+      },
+      "formas_separacion": ["1", "2a", "2b", "3a", "3b", "4a", "4b"],
+      "resistencia_sismica": false,
+      "salidas_max_recomendadas": 12,
+      "aplicacion": "Nodos pequeños / acceso / edge ligero",
+      "complejidad": 1,
+      "costo_relativo": 1
+    },
+    {
+      "codigo": "XL3-800",
+      "nombre": "XL³ 800",
+      "corriente_max_a": 800,
+      "icw_ka": 36,
+      "icc_ka": 50,
+      "ip_disponibles": [30, 31, 40, 43, 55],
+      "dimensiones_mm": {
+        "ancho_tipico": 700,
+        "alto_tipico": 2000,
+        "fondo_tipico": 400,
+        "modulos_referencia": "columnas modulares suelo"
+      },
+      "formas_separacion": ["1", "2a", "2b", "3a", "3b", "4a", "4b"],
+      "resistencia_sismica": true,
+      "salidas_max_recomendadas": 36,
+      "aplicacion": "POP / nodo mediano / edge crítico",
+      "complejidad": 2,
+      "costo_relativo": 2
+    },
+    {
+      "codigo": "XL3-4000",
+      "nombre": "XL³ 4000",
+      "corriente_max_a": 4000,
+      "icw_ka": 85,
+      "icc_ka": 100,
+      "ip_disponibles": [30, 31, 40, 41, 54, 55],
+      "dimensiones_mm": {
+        "ancho_tipico": 900,
+        "alto_tipico": 2200,
+        "fondo_tipico": 600,
+        "modulos_referencia": "columnas potentes multi-columna"
+      },
+      "formas_separacion": ["1", "2a", "2b", "3a", "3b", "4a", "4b"],
+      "resistencia_sismica": true,
+      "salidas_max_recomendadas": 72,
+      "aplicacion": "Salas técnicas grandes / multi-rack / dual feed",
+      "complejidad": 3,
+      "costo_relativo": 3
+    },
+    {
+      "codigo": "XL3-6300",
+      "nombre": "XL³ 6300",
+      "corriente_max_a": 6300,
+      "icw_ka": 100,
+      "icc_ka": 120,
+      "ip_disponibles": [30, 31, 40, 41, 54, 55, 65],
+      "dimensiones_mm": {
+        "ancho_tipico": 1000,
+        "alto_tipico": 2300,
+        "fondo_tipico": 800,
+        "modulos_referencia": "alta potencia industrial / data hall"
+      },
+      "formas_separacion": ["1", "2a", "2b", "3a", "3b", "4a", "4b"],
+      "resistencia_sismica": true,
+      "salidas_max_recomendadas": 120,
+      "aplicacion": "Infraestructura de alta potencia",
+      "complejidad": 4,
+      "costo_relativo": 4
+    }
+  ]
+}

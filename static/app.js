@@ -1,198 +1,394 @@
 let isPaused = false;
+let importLock = false;
 let ws;
-
-// DOM Elements
-const btnPause = document.getElementById('toggle-pause');
-const kpiRead = document.getElementById('kpi-read');
-const kpiDsp = document.getElementById('kpi-dsp');
-const kpiWrite = document.getElementById('kpi-write');
-const kpiFreq = document.getElementById('kpi-freq');
-const logsBox = document.getElementById('logs-box');
-
-// Configuration constants from config.yaml (default assumption)
-const samplingRate = 12800;
-const samplesPerFrame = 256;
-const timeVector = Array.from({length: samplesPerFrame}, (_, i) => (i / samplingRate) * 1000); // in ms
-
-// Chart Setup
-Chart.defaults.color = '#e0e0e0';
-Chart.defaults.font.family = 'Segoe UI';
-
-const ctxWave = document.getElementById('waveformChart').getContext('2d');
-const waveformChart = new Chart(ctxWave, {
-    type: 'line',
-    data: {
-        labels: timeVector.map(t => t.toFixed(1)),
-        datasets: [
-            {
-                label: 'Onda Cruda',
-                borderColor: '#C2C0E3',
-                backgroundColor: 'rgba(194, 192, 227, 0.1)',
-                borderWidth: 2,
-                pointRadius: 0,
-                data: []
-            },
-            {
-                label: 'Onda Compensada',
-                borderColor: '#A7B7CF',
-                backgroundColor: 'rgba(167, 183, 207, 0.1)',
-                borderWidth: 2,
-                pointRadius: 0,
-                data: []
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        animation: false, // For real-time updates
-        scales: {
-            x: { title: { display: true, text: 'Tiempo (ms)', color: '#aaa' } },
-            y: { title: { display: true, text: 'Amplitud', color: '#aaa' } }
-        },
-        plugins: {
-            legend: {
-                position: 'top',
-            }
-        }
-    }
-});
-
-const ctxSpec = document.getElementById('spectrumChart').getContext('2d');
-const spectrumChart = new Chart(ctxSpec, {
-    type: 'bar',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Magnitud (Cruda)',
-            backgroundColor: '#FFFF99',
-            data: []
-        }]
-    },
-    options: {
-        responsive: true,
-        animation: false,
-        scales: {
-            x: { title: { display: true, text: 'Frecuencia (Hz)', color: '#aaa' } },
-            y: { title: { display: true, text: 'Magnitud', color: '#aaa' } }
-        }
-    }
-});
-
-function addLog(msg, type='info') {
-    const el = document.createElement('div');
-    el.className = `log-entry log-${type}`;
-    const timestamp = new Date().toLocaleTimeString();
-    el.innerText = `[${timestamp}] ${msg}`;
-    logsBox.appendChild(el);
-    if(logsBox.childNodes.length > 50) {
-        logsBox.removeChild(logsBox.firstChild);
-    }
-    logsBox.scrollTop = logsBox.scrollHeight;
-}
-
-// Compute Simple Radix-2 FFT or just DFT for spectrum visualization
-// To avoid heavy computation in browser, we compute a simple DFT only for the first few harmonic bins.
-function computeMagnitudeSpectrum(waveform) {
-    const N = waveform.length;
-    // Windowing (Hanning)
-    const windowed = waveform.map((val, n) => val * (0.5 * (1 - Math.cos((2 * Math.PI * n) / (N - 1)))));
-    
-    const magnitudes = [];
-    const labels = [];
-    const numBins = 10; // Up to 9th harmonic
-    
-    // Frequency bins size is exactly fundamental freq if fs/N = 50Hz (12800/256 = 50Hz)
-    for(let k = 0; k <= numBins; k++) {
-        let re = 0;
-        let im = 0;
-        for(let n = 0; n < N; n++) {
-            const angle = (2 * Math.PI * k * n) / N;
-            re += windowed[n] * Math.cos(angle);
-            im -= windowed[n] * Math.sin(angle);
-        }
-        // Normalize magnitude
-        const mag = Math.sqrt(re*re + im*im) / N * 2; 
-        magnitudes.push(k === 0 ? mag / 2 : mag);
-        labels.push(`${k * 50} Hz`);
-    }
-    return { magnitudes, labels };
-}
-
-let lastFrameTime = performance.now();
 let lastChartUpdate = performance.now();
+const $ = (id) => document.getElementById(id);
+const palette = { ink: "#303030", paper: "#D7E0EC", gold: "#E3CA75", indigo: "#5A64BF", indigoDeep: "#485199" };
 
-// New DOM elements
-const kpiThdi = document.getElementById('kpi-thdi');
-const kpiSat = document.getElementById('kpi-sat');
-const satCard = document.getElementById('sat-card');
+document.querySelectorAll(".nav-item").forEach((button) =>
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach((item) => {
+      item.classList.remove("active");
+      item.removeAttribute("aria-current");
+    });
+    button.classList.add("active");
+    button.setAttribute("aria-current", "page");
+    document.querySelectorAll(".view").forEach((view) => {
+      const active = view.id === `${button.dataset.view}-view`;
+      view.classList.toggle("active", active);
+      view.hidden = !active;
+    });
+    document.querySelector(".primary-nav").classList.remove("open");
+    $("mobile-menu").setAttribute("aria-expanded", "false");
+  })
+);
+$("mobile-menu").addEventListener("click", (e) => {
+  const nav = $("primary-nav");
+  const open = nav.classList.toggle("open");
+  e.currentTarget.setAttribute("aria-expanded", String(open));
+});
+
+Chart.defaults.color = "#4F4F4F";
+Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+const gridColor = "rgba(79,79,79,.13)";
+const waveformChart = new Chart($("waveformChart"), {
+  type: "line",
+  data: {
+    labels: Array.from({ length: 128 }, (_, i) => (i / 12.8).toFixed(1)),
+    datasets: [
+      { label: "Ia (carga)", borderColor: palette.indigo, backgroundColor: "rgba(90,100,191,.08)", borderWidth: 2, pointRadius: 0, data: [] },
+      { label: "Referencia Ia", borderColor: "#CCB244", backgroundColor: "rgba(204,178,68,.10)", borderWidth: 2, pointRadius: 0, data: [] },
+      { label: "In (neutro)", borderColor: "#8f3232", borderWidth: 1.5, pointRadius: 0, borderDash: [4, 3], data: [] },
+    ],
+  },
+  options: {
+    responsive: true,
+    animation: false,
+    interaction: { intersect: false },
+    scales: {
+      x: { grid: { color: gridColor }, title: { display: true, text: "Tiempo (ms)" } },
+      y: { grid: { color: gridColor }, title: { display: true, text: "Amplitud (A)" } },
+    },
+    plugins: { legend: { labels: { usePointStyle: true } } },
+  },
+});
+const spectrumChart = new Chart($("spectrumChart"), {
+  type: "bar",
+  data: {
+    labels: ["I1", "H3", "H5", "H7"],
+    datasets: [{ label: "RMS (A)", backgroundColor: [palette.indigoDeep, palette.gold, palette.indigo, "#8f3232"], data: [] }],
+  },
+  options: {
+    responsive: true,
+    animation: false,
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: gridColor }, title: { display: true, text: "RMS (A)" } },
+    },
+    plugins: { legend: { display: false } },
+  },
+});
+
+function addLog(message, type = "info") {
+  const el = document.createElement("div");
+  el.className = `log-entry log-${type}`;
+  el.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+  $("logs-box").appendChild(el);
+  while ($("logs-box").children.length > 50) $("logs-box").firstChild.remove();
+  $("logs-box").scrollTop = $("logs-box").scrollHeight;
+}
+$("clear-logs").addEventListener("click", () => {
+  $("logs-box").replaceChildren();
+  addLog("Registro limpiado por el operador.", "warn");
+});
+
+function fmt(value, digits = 1, suffix = "") {
+  if (value === undefined || value === null || Number.isNaN(Number(value))) return "—";
+  return `${Number(value).toFixed(digits)}${suffix}`;
+}
+
+function applyTelemetry(data) {
+  $("kpi-dsp").textContent = fmt(data.t_dsp_ms, 3, " ms");
+  $("kpi-freq").textContent = fmt(data.freq_est, 2, " Hz");
+  $("kpi-thdi").textContent = fmt(data.thdi, 1, " %");
+  $("kpi-sat").textContent = data.is_saturated ? "SATURADA" : "DENTRO DE LÍMITE";
+  $("sat-card").style.borderTopColor = data.is_saturated ? palette.gold : palette.indigo;
+  $("kpi-i1").textContent = fmt(data.i1_rms, 1, " A");
+  $("kpi-h3").textContent = `${fmt(data.h3_rms, 1)} / ${fmt(data.in_rms, 1)} A`;
+  $("kpi-h5").textContent = fmt(data.h5_rms, 1, " A");
+  $("kpi-h7").textContent = fmt(data.h7_rms, 1, " A");
+  if (performance.now() - lastChartUpdate > 200) {
+    lastChartUpdate = performance.now();
+    waveformChart.data.datasets[0].data = data.raw_waveform || [];
+    waveformChart.data.datasets[1].data = data.comp_waveform || [];
+    waveformChart.data.datasets[2].data = data.raw_neutral || [];
+    waveformChart.update();
+    spectrumChart.data.datasets[0].data = [data.i1_rms || 0, data.h3_rms || 0, data.h5_rms || 0, data.h7_rms || 0];
+    spectrumChart.update();
+    addLog(
+      `Trama ${data.frame_count} · ${fmt(data.freq_est, 2)} Hz · THDi ${fmt(data.thdi, 1)} % · In ${fmt(data.in_rms, 1)} A`
+    );
+  }
+}
 
 function connectWebSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
-
-    ws.onopen = () => {
-        addLog("Conectado al servidor WebSocket.", "info");
-    };
-
-    ws.onmessage = (event) => {
-        if(isPaused) return;
-
-        const data = JSON.parse(event.data);
-        
-        // Update KPIs
-        if(kpiRead) kpiRead.innerText = '-- ms'; // Deprecated in HRT
-        kpiDsp.innerText = data.t_dsp_ms.toFixed(3) + ' ms';
-        kpiFreq.innerText = data.freq_est.toFixed(2) + ' Hz';
-        kpiThdi.innerText = data.thdi.toFixed(1) + ' %';
-        
-        if(data.is_saturated) {
-            kpiSat.innerText = 'SATURADO';
-            kpiSat.style.color = '#FFFF99';
-            satCard.style.borderColor = '#FFFF99';
-        } else {
-            kpiSat.innerText = 'OK';
-            kpiSat.style.color = '#EAEEF4';
-            satCard.style.borderColor = 'var(--border-color)';
-        }
-
-        const now = performance.now();
-        if (now - lastChartUpdate > 200) {
-            lastChartUpdate = now;
-            
-            // Update Waveform Chart
-            waveformChart.data.datasets[0].data = data.raw_waveform;
-            waveformChart.data.datasets[1].data = data.comp_waveform;
-            waveformChart.update();
-
-            // Update Spectrum Chart (using pre-calculated multi-SRF RMS values from server!)
-            spectrumChart.data.labels = ['Fund', '3º Arm', '5º Arm', '7º Arm'];
-            spectrumChart.data.datasets[0].data = [
-                100, // Fundamental is normalized to ~100 in our generator
-                data.h3_rms,
-                data.h5_rms,
-                data.h7_rms
-            ];
-            spectrumChart.update();
-            
-            addLog(`Recibida Trama #${data.frame_count} | Freq: ${data.freq_est.toFixed(2)}Hz | THDi: ${data.thdi.toFixed(1)}%`, "info");
-        }
-    };
-
-    ws.onclose = () => {
-        addLog("Conexión WebSocket cerrada. Reconectando en 2s...", "warn");
-        setTimeout(connectWebSocket, 2000);
-    };
-
-    ws.onerror = (err) => {
-        addLog("Error de conexión WebSocket.", "error");
-    };
+  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+  ws = new WebSocket(`${protocol}//${location.host}/ws`);
+  ws.onopen = () => addLog("Canal de telemetría conectado.");
+  ws.onmessage = (event) => {
+    if (isPaused || importLock) return;
+    applyTelemetry(JSON.parse(event.data));
+  };
+  ws.onclose = () => {
+    addLog("Canal desconectado; reintentando…", "warn");
+    setTimeout(connectWebSocket, 2000);
+  };
+  ws.onerror = () => addLog("No fue posible conectar con la telemetría.", "error");
 }
-
-btnPause.addEventListener('click', () => {
-    isPaused = !isPaused;
-    btnPause.innerText = isPaused ? "Reanudar Actualización" : "Pausar Actualización";
-    addLog(isPaused ? "Actualización pausada por el usuario." : "Actualización reanudada.", "warn");
+$("toggle-pause").addEventListener("click", (e) => {
+  isPaused = !isPaused;
+  e.currentTarget.textContent = isPaused ? "Reanudar datos" : "Pausar datos";
+  e.currentTarget.setAttribute("aria-pressed", String(isPaused));
+  addLog(isPaused ? "Visualización pausada." : "Visualización reanudada.", "warn");
 });
 
-// Start connection
+const escapeHtml = (value) =>
+  String(value).replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+
+async function refreshRuntime() {
+  try {
+    const runtime = await (await fetch("/api/runtime")).json();
+    $("chip-server-label").textContent = runtime.server === "running" ? "en ejecución" : runtime.server;
+    $("chip-acq-label").textContent = runtime.acquisition_label || runtime.acquisition;
+    $("chip-hw-label").textContent = runtime.hardware_label || runtime.hardware;
+    $("chip-acq").classList.toggle("live", runtime.telemetry_live || runtime.acquisition === "imported");
+    $("monitor-idle").hidden = runtime.acquisition !== "none" || importLock;
+  } catch (_error) {
+    $("chip-server-label").textContent = "sin API";
+  }
+}
+
+async function refreshProject() {
+  try {
+    const project = await (await fetch("/api/project")).json();
+    $("project-id").textContent = project.project_id;
+    const thdi = project.links.observed_thdi;
+    $("project-thdi").textContent = thdi == null ? "sin datos DSP" : `${Number(thdi).toFixed(1)} %`;
+    const icomp = project.links.tan_compensation_current_a ?? project.links.observed_compensation_current_a;
+    $("project-icomp").textContent = icomp == null ? "—" : `${Number(icomp).toFixed(1)} A`;
+    const bank = project.power_stage;
+    $("project-bank").textContent = bank ? `${bank.state}${bank.fault && bank.fault !== "NONE" ? " · " + bank.fault : ""}` : "—";
+  } catch (_error) {
+    $("project-id").textContent = "no disponible";
+  }
+}
+$("reset-project").addEventListener("click", async () => {
+  await fetch("/api/project/reset", { method: "POST" });
+  await refreshProject();
+  addLog("Proyecto común reiniciado.", "warn");
+});
+
+$("design-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  const submit = event.currentTarget.querySelector("button[type=submit]");
+  const payload = {
+    potencia_kw: Number(form.get("potencia_kw")),
+    num_racks: Number(form.get("num_racks")),
+    redundancia: form.get("redundancia"),
+    ip_minimo: Number(String(form.get("ip_minimo")).replace("IP", "")),
+    carga_armonica: form.has("carga_armonica"),
+    sismico: form.has("sismico"),
+  };
+  submit.disabled = true;
+  submit.textContent = "Calculando…";
+  $("form-message").textContent = "";
+  try {
+    const response = await fetch("/api/tan/design", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "No se pudo calcular el diseño.");
+    renderDesign(data);
+    await refreshProject();
+  } catch (error) {
+    $("form-message").textContent = error.message;
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "Calcular diseño";
+  }
+});
+
+function reportButtons(reports) {
+  const labels = { xlsx: "Excel", pdf: "PDF", json: "JSON", md: "Markdown", html: "HTML", csv: "CSV BOM" };
+  const items = Object.entries(reports || {}).map(([fmt, meta]) => {
+    const target = fmt === "html" ? " target=\"_blank\" rel=\"noopener\"" : " download";
+    return `<a class="button secondary report-link" href="${escapeHtml(meta.url)}"${target}>${labels[fmt] || fmt}</a>`;
+  });
+  return `<div class="export-bar"><p class="eyebrow">INFORME EN VARIOS FORMATOS</p><div class="export-actions">${items.join("")}</div></div>`;
+}
+
+function renderTable(headers, rows) {
+  const head = headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("");
+  const body = rows
+    .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
+    .join("");
+  return `<div class="table-wrap"><table class="data-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+function renderDesign(data) {
+  const e = data.electrical;
+  const n = data.enclosure;
+  const s = data.separation;
+  const observed = data.observed_harmonics;
+  const warnings = (data.warnings || []).map((w) => `<div class="warning">${escapeHtml(w)}</div>`).join("");
+  const observedBlock = observed
+    ? `<article class="panel"><p class="eyebrow">MONITOR → TAN</p><h2>THDi ${escapeHtml(String(Number(observed.thdi).toFixed(1)))} %</h2>
+       <p>I compensación observada: <strong>${escapeHtml(String(data.compensation_current_a))} A</strong></p>
+       <p>${escapeHtml(data.ahf_module_suggestion || "")}</p>
+       <p class="muted">${escapeHtml(data.ric04_neutral_note || "")}</p></article>`
+    : `<article class="panel"><p class="eyebrow">MONITOR → TAN</p><h2>Sin telemetría DSP</h2><p>El prediseño no recibió THDi. Arranque industrial o calcule sólo con el flag de carga armónica.</p></article>`;
+  const verTable = renderTable(
+    ["N°", "Característica", "Artículo", "Estado"],
+    (data.verifications || []).map((item) => [item.numero, item.caracteristica, item.articulo, item.estado])
+  );
+  const bomTable = renderTable(
+    ["Código", "Descripción", "Cant.", "Ud.", "Categoría"],
+    (data.bom || []).map((item) => [item.codigo, item.descripcion, item.cantidad, item.unidad, item.categoria])
+  );
+  $("design-result").innerHTML = `<article class="panel result-hero"><p class="eyebrow">${escapeHtml(data.shared_project_id || data.project_id)}</p><h2>${escapeHtml(n.nombre)}</h2><p>Familia ${escapeHtml(s.familia_tan)} · Forma ${escapeHtml(s.forma)} · IP${escapeHtml(n.ip_seleccionado)}</p></article><div class="result-grid"><div class="result-metric"><span>Corriente base</span><strong>${e.in_base_a} A</strong></div><div class="result-metric"><span>Selección</span><strong>${e.in_seleccion_a} A</strong></div><div class="result-metric"><span>Icc estimada</span><strong>${e.icc_estimada_ka} kA</strong></div><div class="result-metric"><span>ΔT estimado</span><strong>${e.delta_t_estimado_c} °C</strong></div></div>${warnings}${observedBlock}${reportButtons(data.reports)}<div class="result-detail"><article class="panel"><p class="eyebrow">ENVOLVENTE</p><h2>${escapeHtml(n.codigo)}</h2><ul>${n.justificacion.slice(0, 3).map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul></article><article class="panel"><p class="eyebrow">SEGREGACIÓN</p><h2>Forma ${escapeHtml(s.forma)}</h2><ul>${s.justificacion.slice(0, 3).map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul></article></div><article class="panel"><p class="eyebrow">VERIFICACIONES IEC 61439</p><h2>Tabla de diseño</h2>${verTable}</article><article class="panel"><p class="eyebrow">LISTA DE MATERIALES</p><h2>BOM tipificada</h2>${bomTable}</article>`;
+}
+
+let powerStageStatus = null;
+async function refreshPowerStage() {
+  try {
+    const response = await fetch("/api/power-stage/status");
+    if (!response.ok) throw new Error("Estado HIL no disponible.");
+    renderPowerStage(await response.json());
+    await refreshProject();
+  } catch (error) {
+    $("ps-message").textContent = error.message;
+  }
+}
+function renderPowerStage(data) {
+  powerStageStatus = data;
+  const m = data.measurements;
+  const o = data.outputs;
+  const i = data.interlocks;
+  $("ps-state").textContent = data.state;
+  $("ps-fault").textContent = data.fault === "NONE" ? "Sin fallas activas" : `${data.fault}: ${data.fault_message}`;
+  $("ps-vdc").textContent = `${m.dc_bus_v.toFixed(1)} V`;
+  $("ps-current").textContent = `${m.phase_current_a.toFixed(1)} A`;
+  $("ps-temperature").textContent = `${m.temperature_c.toFixed(1)} °C`;
+  $("ps-precharge-label").textContent = `${m.precharge_percent.toFixed(0)}%`;
+  $("ps-precharge-bar").style.width = `${Math.min(100, m.precharge_percent)}%`;
+  $("chain-source").classList.toggle("active", data.state !== "POWER_OFF");
+  $("chain-precharge").classList.toggle("active", o.precharge_contactor);
+  $("chain-main").classList.toggle("active", o.main_contactor);
+  $("chain-gates").classList.toggle("active", o.gate_enable && o.pwm_enabled);
+  $("interlock-estop").classList.toggle("interlock-ok", i.estop_ok);
+  $("interlock-sensor").classList.toggle("interlock-ok", i.sensor_ok);
+  $("interlock-driver").classList.toggle("interlock-ok", i.gate_driver_ready);
+  $("ps-events").innerHTML = data.events
+    .map(
+      (event) =>
+        `<div class="event-row"><time>${escapeHtml(new Date(event.timestamp).toLocaleString())}</time><strong>${escapeHtml(event.state)}</strong><span>${escapeHtml(event.message)}</span></div>`
+    )
+    .join("");
+}
+async function sendPowerStageCommand(command, fault = null) {
+  $("ps-message").textContent = "";
+  try {
+    const response = await fetch("/api/power-stage/command", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command, fault }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "Comando rechazado por los interlocks.");
+    renderPowerStage(data);
+    await refreshProject();
+  } catch (error) {
+    $("ps-message").textContent = error.message;
+  }
+}
+document.querySelectorAll(".ps-command").forEach((button) =>
+  button.addEventListener("click", () => sendPowerStageCommand(button.dataset.command))
+);
+$("inject-fault").addEventListener("click", () => sendPowerStageCommand("inject_fault", $("fault-select").value));
+
+async function loadBenchPackage() {
+  try {
+    const pack = await (await fetch("/api/bench/package")).json();
+    $("bench-unifilar").innerHTML = pack.unifilar.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+    $("bench-risks").innerHTML = pack.risks
+      .map((item) => `<li><strong>${escapeHtml(item.id)}</strong> ${escapeHtml(item.hazard)}</li>`)
+      .join("");
+    $("bench-bom").innerHTML = pack.cft_bom
+      .map((item) => `<li>${escapeHtml(item.item)} <span>${escapeHtml(item.source)}</span></li>`)
+      .join("");
+    $("bench-accept").innerHTML = pack.acceptance
+      .map((item) => `<li><strong>${escapeHtml(item.id)}</strong> ${escapeHtml(item.criterion)}</li>`)
+      .join("");
+    if (pack.layers) {
+      $("bench-layers").innerHTML = ["A", "B", "C"]
+        .filter((key) => pack.layers[key])
+        .map((key) => `<li><strong>Capa ${key}</strong> ${escapeHtml(pack.layers[key])}</li>`)
+        .join("");
+    }
+    if (pack.forbidden) {
+      $("bench-forbidden").textContent = `Prohibido en este TPA: ${pack.forbidden}`;
+    }
+  } catch (_error) {
+    $("bench-unifilar").innerHTML = "<li>No se pudo cargar el paquete del banco.</li>";
+  }
+}
+
+function showImportMeta(payload) {
+  const meta = payload.meta || {};
+  const warnings = payload.warnings || [];
+  const bits = [
+    meta.filename && `Archivo: ${meta.filename}`,
+    meta.mode && `Modo: ${meta.mode}`,
+    meta.samples && `${meta.samples} muestras`,
+    meta.fs_inferred_hz && `fs ≈ ${Number(meta.fs_inferred_hz).toFixed(0)} Hz`,
+    meta.used_channels && `Canales: ${(meta.used_channels || []).join(", ")}`,
+  ].filter(Boolean);
+  $("import-meta").hidden = false;
+  $("import-meta").innerHTML = `<p>${bits.map(escapeHtml).join(" · ")}</p>${
+    warnings.length ? `<ul>${warnings.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""
+  }`;
+}
+
+$("import-apply").addEventListener("click", async () => {
+  const file = $("import-file").files[0];
+  $("import-message").textContent = "";
+  if (!file) {
+    $("import-message").textContent = "Elija un CSV o JSON exportado del osciloscopio o de la central.";
+    return;
+  }
+  const body = new FormData();
+  body.append("file", file);
+  const fs = Number($("import-fs").value);
+  if (fs > 1) body.append("fs", String(fs));
+  body.append("current_scale", $("import-iscale").value || "1");
+  body.append("voltage_scale", $("import-vscale").value || "1");
+  $("import-apply").disabled = true;
+  $("import-apply").textContent = "Procesando…";
+  try {
+    const response = await fetch("/api/acquisition/import", { method: "POST", body });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "No se pudo importar la campaña.");
+    importLock = true;
+    lastChartUpdate = 0;
+    applyTelemetry(data.telemetry);
+    showImportMeta(data);
+    addLog(`Campaña importada: ${file.name}`, "warn");
+    await refreshRuntime();
+    await refreshProject();
+  } catch (error) {
+    $("import-message").textContent = error.message;
+  } finally {
+    $("import-apply").disabled = false;
+    $("import-apply").textContent = "Procesar y usar en el Monitor";
+  }
+});
+
+$("import-clear").addEventListener("click", async () => {
+  await fetch("/api/acquisition/clear", { method: "POST" });
+  importLock = false;
+  $("import-meta").hidden = true;
+  $("import-message").textContent = "";
+  addLog("Campaña importada liberada.", "warn");
+  await refreshRuntime();
+});
+
+setInterval(refreshPowerStage, 500);
+refreshPowerStage();
+refreshRuntime();
+refreshProject();
+loadBenchPackage();
+setInterval(refreshRuntime, 4000);
 connectWebSocket();

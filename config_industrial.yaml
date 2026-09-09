@@ -1,5 +1,16 @@
 system:
   mode: "simulation" # "simulation" or "hardware"
+  voltage_ln_rms: 230.0
+
+simulation:
+  pattern: "combined_it"
+  voltage_ln_rms: 230.0
+  i1_peak: 100.0
+  h3_peak: 20.0
+  h5_peak: 10.0
+  h7_peak: 5.0
+  noise_rms: 0.5
+  freq_drift: true
 
 network:
   nominal_frequency: 50.0 # Hz

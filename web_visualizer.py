@@ -8,12 +8,16 @@ from fastapi.responses import FileResponse
 
 import main as controller_main
 import mock_scada_server
+from tan_service import router as tan_router
+from power_stage_service import router as power_stage_router
 
 # Configuración de log
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("web_visualizer")
 
 app = FastAPI()
+app.include_router(tan_router)
+app.include_router(power_stage_router)
 
 # Montar archivos estáticos
 app.mount("/static", StaticFiles(directory="static"), name="static")

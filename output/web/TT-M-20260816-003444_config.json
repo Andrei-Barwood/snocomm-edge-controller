@@ -1,0 +1,364 @@
+{
+  "project_id": "TT-M-20260816-003444",
+  "version": "1.0.0",
+  "generated_at": "2026-08-16T00:34:44.247912+00:00",
+  "inputs": {
+    "potencia_kw": 120.0,
+    "num_racks": 8,
+    "redundancia": "N+1",
+    "ip_minimo": 54,
+    "carga_armonica": true,
+    "sismico": false,
+    "output_dir": "/Users/andreibarwood/Documents/snocomm/snocomm-edge-controller/output/web",
+    "verbose": false,
+    "example_name": null,
+    "tension_v": 400.0,
+    "cos_phi": 0.9,
+    "rendimiento": 0.95
+  },
+  "electrical": {
+    "in_base_a": 202.58,
+    "factor_redundancia": 1.2,
+    "in_diseno_a": 243.09,
+    "in_seleccion_a": 250.0,
+    "icc_estimada_ka": 25.0,
+    "icw_requerida_ka": 25.0,
+    "rdf": 0.7,
+    "factor_simultaneidad": 0.75,
+    "factor_utilizacion": 0.88,
+    "potencia_disipada_w": 92.2,
+    "delta_t_estimado_c": 24.8,
+    "calentamiento_ok": true,
+    "limite_delta_t_c": 30.0,
+    "formula_in": "In = (P·1000)/(√3·V·cosφ·η) = (120.0·1000)/(√3·400.0·0.9·0.95)",
+    "notas": [
+      "In base calculada a 400 V, cosφ=0.9, η=0.95.",
+      "Factor de redundancia (N+1) = 1.20.",
+      "RDF = 0.70 para 8 circuitos/salidas.",
+      "Cargas armónicas activas: se incrementó utilización y pérdidas (efecto N y disipación)."
+    ]
+  },
+  "enclosure": {
+    "codigo": "XL3-800",
+    "nombre": "XL³ 800",
+    "corriente_max_a": 800.0,
+    "icw_ka": 36.0,
+    "icc_ka": 50.0,
+    "ip_seleccionado": 55,
+    "ip_disponibles": [
+      30,
+      31,
+      40,
+      43,
+      55
+    ],
+    "dimensiones_mm": {
+      "ancho_tipico": 700,
+      "alto_tipico": 2000,
+      "fondo_tipico": 400,
+      "modulos_referencia": "columnas modulares suelo"
+    },
+    "formas_soportadas": [
+      "1",
+      "2a",
+      "2b",
+      "3a",
+      "3b",
+      "4a",
+      "4b"
+    ],
+    "resistencia_sismica": true,
+    "justificacion": [
+      "Menor envolvente que cumple In de selección 250 A (capacidad 800 A).",
+      "Icw/Icc catálogo 36/50 kA ≥ requeridos 25.0/25.0 kA.",
+      "IP disponible compatible con IP54 (seleccionada IP55).",
+      "Capacidad de salidas: hasta 36 (proyecto: 8)."
+    ],
+    "alternativas": [
+      "XL3-4000",
+      "XL3-6300"
+    ]
+  },
+  "separation": {
+    "forma": "3b",
+    "criticidad": "alta",
+    "familia_tan": "TT-M",
+    "justificacion": [
+      "Criticidad alta (redundancia, multi-rack o corriente media-alta).",
+      "Forma 3b: separación barras/UF, separación entre UF y bornes en zona de cables separada de barras.",
+      "Permite intervención selectiva sin exponer todas las unidades funcionales.",
+      "Cargas armónicas: se favorece segregación para limitar propagación térmica/eléctrica."
+    ],
+    "alternativas": [
+      "4b",
+      "2b"
+    ]
+  },
+  "verifications": [
+    {
+      "numero": 1,
+      "caracteristica": "Resistencia de materiales y partes (corrosión, estabilidad térmica, resistencia al fuego, UV, elevación, impacto, marcación)",
+      "articulo": "10.2",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "SÍ*",
+      "estado": "CUBIERTO por diseño de referencia XL³/TAN",
+      "observaciones": "Depende del sistema de envolvente verificado del fabricante original."
+    },
+    {
+      "numero": 2,
+      "caracteristica": "Grado de protección IP",
+      "articulo": "10.3",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "CUMPLE",
+      "observaciones": "IP requerido IP54; seleccionado IP55."
+    },
+    {
+      "numero": 3,
+      "caracteristica": "Distancias de aislación",
+      "articulo": "10.4",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "NO",
+      "estado": "CUBIERTO (diseño de referencia)",
+      "observaciones": "Mantener clearances del sistema de barras y aparatos instalados."
+    },
+    {
+      "numero": 4,
+      "caracteristica": "Líneas de fuga",
+      "articulo": "10.4",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "NO",
+      "estado": "CUBIERTO (diseño de referencia)",
+      "observaciones": "Verificar contaminación / CTI de materiales en ambiente del sitio."
+    },
+    {
+      "numero": 5,
+      "caracteristica": "Protección contra descargas eléctricas e integridad de circuitos de protección (continuidad PE / resistencia ante cortocircuito del PE)",
+      "articulo": "10.5",
+      "ensayos": "SÍ",
+      "comparacion": "SÍ",
+      "evaluacion": "NO",
+      "estado": "A COMPLETAR por ensamblador (ensayo/rutina)",
+      "observaciones": "Continuidade PE y bornes de tierra: verificación de rutina obligatoria."
+    },
+    {
+      "numero": 6,
+      "caracteristica": "Integración de aparatos de conexión y componentes",
+      "articulo": "10.6",
+      "ensayos": "NO",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "CUBIERTO por reglas de diseño del sistema",
+      "observaciones": "Forma 3b: respetar kits de segregación y zonas UF."
+    },
+    {
+      "numero": 7,
+      "caracteristica": "Circuitos internos y conexiones",
+      "articulo": "10.7",
+      "ensayos": "NO",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "A COMPLETAR por ensamblador",
+      "observaciones": "Cableado interno según secciones y torque de bornes del fabricante."
+    },
+    {
+      "numero": 8,
+      "caracteristica": "Bornes para conductores externos",
+      "articulo": "10.8",
+      "ensayos": "NO",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "CUBIERTO (diseño + forma de separación)",
+      "observaciones": "Forma 3b: bornes en zona conforme a variante a/b."
+    },
+    {
+      "numero": 9,
+      "caracteristica": "Propiedades dieléctricas (tensión a frecuencia industrial e impulso)",
+      "articulo": "10.9",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "CUBIERTO por diseño de referencia / ensayo de tipo",
+      "observaciones": "Ue/Ui/Uimp de placa deben declararse en el conjunto final."
+    },
+    {
+      "numero": 10,
+      "caracteristica": "Límites de calentamiento (elevación de temperatura)",
+      "articulo": "10.10",
+      "ensayos": "SÍ",
+      "comparacion": "SÍ",
+      "evaluacion": "SÍ",
+      "estado": "CUMPLE (estimación)",
+      "observaciones": "ΔT estimado 24.8 °C (límite ref. 30.0 °C); RDF=0.7, P_loss≈92.2 W. No sustituye ensayo de tipo."
+    },
+    {
+      "numero": 11,
+      "caracteristica": "Resistencia a cortocircuitos",
+      "articulo": "10.11",
+      "ensayos": "SÍ",
+      "comparacion": "SÍ",
+      "evaluacion": "NO",
+      "estado": "CUMPLE (catálogo ≥ req.)",
+      "observaciones": "Icc/Icw requeridos ≈ 25.0/25.0 kA; envolvente XL3-800 Icw/Icc 36.0/50.0 kA."
+    },
+    {
+      "numero": 12,
+      "caracteristica": "Compatibilidad electromagnética (CEM)",
+      "articulo": "10.12",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "SÍ",
+      "estado": "CUBIERTO (condiciones de instalación típicas)",
+      "observaciones": "En telecomunicaciones, cuidar segregación de potencias y tierras de señal."
+    },
+    {
+      "numero": 13,
+      "caracteristica": "Funcionamiento mecánico",
+      "articulo": "10.13",
+      "ensayos": "SÍ",
+      "comparacion": "NO",
+      "evaluacion": "NO",
+      "estado": "A COMPLETAR por ensamblador (rutina)",
+      "observaciones": "Maniobras de aparatos, enclavamiento y cierre de puertas."
+    },
+    {
+      "numero": 14,
+      "caracteristica": "Resistencia sísmica / condiciones especiales de servicio",
+      "articulo": "IEC 60068-3-3 / UBC (si aplica)",
+      "ensayos": "SÍ",
+      "comparacion": "SÍ",
+      "evaluacion": "SÍ",
+      "estado": "N/A",
+      "observaciones": "No requerido en esta configuración."
+    }
+  ],
+  "bom": [
+    {
+      "codigo": "ENV-XL3-800",
+      "descripcion": "Envolvente XL³ 800 IP55",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Envolvente",
+      "observaciones": "In max 800.0 A"
+    },
+    {
+      "codigo": "BAR-CU-MAIN",
+      "descripcion": "Juego de barras de cobre dimensionado a 250 A",
+      "cantidad": 1,
+      "unidad": "juego",
+      "categoria": "Barras",
+      "observaciones": "Icw ref. 25.0 kA"
+    },
+    {
+      "codigo": "QG-MAIN",
+      "descripcion": "Interruptor/seccionador general 250 A",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Aparatos",
+      "observaciones": "Redundancia N+1"
+    },
+    {
+      "codigo": "KIT-FORM-3B",
+      "descripcion": "Kit de segregación interna Forma 3b",
+      "cantidad": 1,
+      "unidad": "juego",
+      "categoria": "Separación",
+      "observaciones": "Plastrones, tabiques, canalizaciones de forma"
+    },
+    {
+      "codigo": "UF-RACK-OUT",
+      "descripcion": "Unidades funcionales / salidas a racks",
+      "cantidad": 8,
+      "unidad": "u",
+      "categoria": "Salidas",
+      "observaciones": "Protecciones por rack tipificadas"
+    },
+    {
+      "codigo": "UF-CLIMA",
+      "descripcion": "Salida clima / ventilación",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Salidas",
+      "observaciones": ""
+    },
+    {
+      "codigo": "UF-UPS",
+      "descripcion": "Salida UPS / servicios críticos",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Salidas",
+      "observaciones": ""
+    },
+    {
+      "codigo": "UF-AUX",
+      "descripcion": "Auxiliares (iluminación tablero, tomas de servicio)",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Salidas",
+      "observaciones": ""
+    },
+    {
+      "codigo": "BOR-EXT",
+      "descripcion": "Bornes para conductores externos + PE",
+      "cantidad": 1,
+      "unidad": "juego",
+      "categoria": "Conexionado",
+      "observaciones": "Zona de cables según forma a/b"
+    },
+    {
+      "codigo": "ID-PLATE",
+      "descripcion": "Placa de características IEC 61439 + marcaje TAN-Telecom",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Documentación",
+      "observaciones": ""
+    },
+    {
+      "codigo": "DOC-PACK",
+      "descripcion": "Paquete documental (unifilar, verificaciones, declaración)",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Documentación",
+      "observaciones": ""
+    },
+    {
+      "codigo": "COUPLER-OPT",
+      "descripcion": "Preparación acoplamiento / segunda acometida",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Aparatos",
+      "observaciones": "Dual feed / reserva de columna"
+    },
+    {
+      "codigo": "NEUTRO-SOBRE",
+      "descripcion": "Neutro sobredimensionado / atención a armónicos 3er orden",
+      "cantidad": 1,
+      "unidad": "u",
+      "categoria": "Barras",
+      "observaciones": "Buena práctica con cargas no lineales IT"
+    }
+  ],
+  "warnings": [
+    "THDi observado en el monitor (18.0 %) alimenta este prediseño como evidencia académica, no como medición IEC/SEC.",
+    "Corriente de compensación observada ≈ 11.4 A RMS (Módulo académico de referencia 50 A (no es un rating de producto).)."
+  ],
+  "shared_project_id": "SNO-20260816-003444",
+  "observed_harmonics": {
+    "thdi": 18.0,
+    "thdi_method": "Ih(3+5+7) / I1 · 100",
+    "i1_rms": 70.0,
+    "h3_rms": 10.0,
+    "h5_rms": 5.0,
+    "h7_rms": 2.0,
+    "in_rms": 30.0,
+    "disclaimer": null
+  },
+  "compensation_current_a": 11.36,
+  "ahf_module_suggestion": "Módulo académico de referencia 50 A (no es un rating de producto).",
+  "ric04_neutral_note": "RIC 04 p.5.3: con cargas no lineales el neutro debe ser al menos 50 % mayor que las fases, salvo excepción literal de filtro en la carga.",
+  "power_stage": null
+}

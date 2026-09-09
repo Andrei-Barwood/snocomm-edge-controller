@@ -1,0 +1,12 @@
+proyecto,codigo,descripcion,cantidad,unidad,categoria,observaciones
+TT-S-20260816-003457,ENV-XL3-160,Envolvente XL³ 160 IP55,1,u,Envolvente,In max 160.0 A
+TT-S-20260816-003457,BAR-CU-MAIN,Juego de barras de cobre dimensionado a 80 A,1,juego,Barras,Icw ref. 16.0 kA
+TT-S-20260816-003457,QG-MAIN,Interruptor/seccionador general 80 A,1,u,Aparatos,Redundancia N
+TT-S-20260816-003457,KIT-FORM-2B,Kit de segregación interna Forma 2b,1,juego,Separación,"Plastrones, tabiques, canalizaciones de forma"
+TT-S-20260816-003457,UF-RACK-OUT,Unidades funcionales / salidas a racks,4,u,Salidas,Protecciones por rack tipificadas
+TT-S-20260816-003457,UF-CLIMA,Salida clima / ventilación,1,u,Salidas,
+TT-S-20260816-003457,UF-UPS,Salida UPS / servicios críticos,1,u,Salidas,
+TT-S-20260816-003457,UF-AUX,"Auxiliares (iluminación tablero, tomas de servicio)",1,u,Salidas,
+TT-S-20260816-003457,BOR-EXT,Bornes para conductores externos + PE,1,juego,Conexionado,Zona de cables según forma a/b
+TT-S-20260816-003457,ID-PLATE,Placa de características IEC 61439 + marcaje TAN-Telecom,1,u,Documentación,
+TT-S-20260816-003457,DOC-PACK,"Paquete documental (unifilar, verificaciones, declaración)",1,u,Documentación,

@@ -1,0 +1,20 @@
+# GRATTEN GA1102CAL DIGITAL STORAGE OSCILLOSCOPE
+# Channel: CH1
+# Coupling: DC
+# Probe: 1X
+# Volt/div: 5.000000
+# Time/div: 5.000000e-03
+# Nota TPA: ejemplo corto de pañol 24 VDC (KPS305D). No es H3/H5/H7.
+# Confirmar cabecera real en el primer dump del Gratten.
+Time,CH1
+-0.025000,24.03
+-0.020000,23.97
+-0.015000,24.01
+-0.010000,24.00
+-0.005000,23.99
+0.000000,24.02
+0.005000,23.98
+0.010000,24.01
+0.015000,24.00
+0.020000,23.99
+0.025000,24.02

@@ -1,64 +1,201 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AHF Edge Controller Dashboard</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#303030">
+  <title>Snocomm · Control de energía</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <header>
-        <h1>AHF Edge Controller - Panel SCADA</h1>
-        <button id="toggle-pause">Pausar Actualización</button>
-    </header>
+  <a class="skip-link" href="#main-content">Saltar al contenido</a>
+  <header class="app-header">
+    <a class="brand" href="#monitor" aria-label="Snocomm, inicio">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <span><strong>SNOCOMM</strong><small>ENERGY CONTROL</small></span>
+    </a>
+    <div class="runtime-status" id="runtime-status" role="status">
+      <div class="status-chip" id="chip-server"><span class="status-dot"></span><small>Servidor</small><strong id="chip-server-label">…</strong></div>
+      <div class="status-chip" id="chip-acq"><span class="status-dot muted"></span><small>Adquisición</small><strong id="chip-acq-label">…</strong></div>
+      <div class="status-chip" id="chip-hw"><span class="status-dot muted"></span><small>Hardware</small><strong id="chip-hw-label">…</strong></div>
+    </div>
+    <button id="mobile-menu" class="mobile-menu" type="button" aria-expanded="false" aria-controls="primary-nav">Menú</button>
+  </header>
 
-    <main>
-        <section class="kpi-container">
-            <div class="kpi-card">
-                <h3>Latencia Modbus (Lectura)</h3>
-                <p id="kpi-read">-- ms</p>
-            </div>
-            <div class="kpi-card">
-                <h3>Latencia DSP (Ejecución)</h3>
-                <p id="kpi-dsp">-- ms</p>
-            </div>
-            <div class="kpi-card">
-                <h3>Frecuencia PLL</h3>
-                <p id="kpi-freq">-- Hz</p>
-            </div>
-            <div class="kpi-card">
-                <h3>THDi Total</h3>
-                <p id="kpi-thdi">-- %</p>
-            </div>
-            <div class="kpi-card" id="sat-card">
-                <h3>Estado Hardware</h3>
-                <p id="kpi-sat" style="color: #69f0ae;">OK</p>
-            </div>
+  <nav id="primary-nav" class="primary-nav" aria-label="Navegación principal">
+    <button class="nav-item active" data-view="monitor" aria-current="page">Monitor AHF</button>
+    <button class="nav-item" data-view="design">Diseño TAN</button>
+    <button class="nav-item" data-view="power-stage">Banco 24V</button>
+    <span class="nav-context">Preingeniería · simulación académica</span>
+  </nav>
+
+  <section class="project-bar" id="project-bar" aria-label="Proyecto común">
+    <div><p class="eyebrow">PROYECTO COMÚN</p><strong id="project-id">—</strong></div>
+    <div><span>THDi → TAN</span><strong id="project-thdi">sin datos DSP</strong></div>
+    <div><span>I compensación</span><strong id="project-icomp">—</strong></div>
+    <div><span>Banco 24 V</span><strong id="project-bank">—</strong></div>
+    <button id="reset-project" class="text-button" type="button">Reiniciar proyecto</button>
+  </section>
+
+  <main id="main-content">
+    <section id="monitor-view" class="view active" aria-labelledby="monitor-title">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">SEÑAL PATRÓN · REFERENCIA DE COMPENSACIÓN</p>
+          <h1 id="monitor-title">Monitor armónico simulado</h1>
+          <p>Calcula una referencia en contrafase para 3/5/7 en 3P+N. No mide con instrumento certificado ni inyecta corriente.</p>
+        </div>
+        <button id="toggle-pause" class="button secondary" type="button">Pausar datos</button>
+      </div>
+      <p id="monitor-idle" class="idle-banner" hidden>Este arranque no tiene productor DSP. Importe un CSV del osciloscopio o un JSON de la central, o use <code>python main_industrial.py</code> para la señal patrón.</p>
+
+      <section class="panel import-panel" aria-labelledby="import-title">
+        <div class="panel-title">
+          <div>
+            <p class="eyebrow">CAMPAÑA UNIVERSAL</p>
+            <h2 id="import-title">Importar osciloscopio o central</h2>
+          </div>
+          <a class="text-button" href="/api/acquisition/example.csv">Descargar CSV de ejemplo</a>
+        </div>
+        <p class="muted">CSV (Time, CH1… o Ia/Va) o JSON con <code>channels</code> y/o <code>registers</code>. El diferencial no se importa: va el medidor o el scope.</p>
+        <div class="import-grid">
+          <label>Archivo <input id="import-file" type="file" accept=".csv,.txt,.json,text/csv,application/json"></label>
+          <label>fs [Hz] si no hay tiempo <input id="import-fs" type="number" min="100" step="100" placeholder="auto"></label>
+          <label>Escala de corriente <input id="import-iscale" type="number" step="0.01" value="1"></label>
+          <label>Escala de tensión <input id="import-vscale" type="number" step="0.01" value="1"></label>
+        </div>
+        <div class="import-actions">
+          <button id="import-apply" class="button primary" type="button">Procesar y usar en el Monitor</button>
+          <button id="import-clear" class="button secondary" type="button">Soltar campaña</button>
+        </div>
+        <p id="import-message" class="form-message" role="alert"></p>
+        <div id="import-meta" class="import-meta" hidden></div>
+      </section>
+
+      <section class="kpi-container" aria-label="Indicadores principales">
+        <article class="kpi-card"><span>Latencia DSP</span><strong id="kpi-dsp">-- ms</strong><small>Microbloques, no hard real-time</small></article>
+        <article class="kpi-card"><span>PLL (tensión PCC)</span><strong id="kpi-freq">-- Hz</strong><small>No se sincroniza a la corriente</small></article>
+        <article class="kpi-card"><span>THDi Ih/I1</span><strong id="kpi-thdi">-- %</strong><small>Académico · no IEC/SEC</small></article>
+        <article class="kpi-card" id="sat-card"><span>Saturación de referencia</span><strong id="kpi-sat">EN ESPERA</strong><small>Límite de corriente de compensación</small></article>
+      </section>
+      <section class="kpi-container kpi-secondary" aria-label="Componentes extraídas">
+        <article class="kpi-card light"><span>I1 RMS</span><strong id="kpi-i1">-- A</strong><small>Fundamental extraída</small></article>
+        <article class="kpi-card light"><span>H3 / neutro</span><strong id="kpi-h3">-- A</strong><small>Secuencia cero · In</small></article>
+        <article class="kpi-card light"><span>H5 seq. neg.</span><strong id="kpi-h5">-- A</strong><small>250 Hz</small></article>
+        <article class="kpi-card light"><span>H7 seq. pos.</span><strong id="kpi-h7">-- A</strong><small>350 Hz</small></article>
+      </section>
+
+      <section class="charts-container">
+        <article class="panel chart-wrapper"><div class="panel-title"><div><p class="eyebrow">FORMA DE ONDA</p><h2>Fase A, neutro y referencia</h2></div><span class="live-label">SIMULADO</span></div><canvas id="waveformChart" aria-label="Gráfico de onda cruda, neutro y compensación"></canvas></article>
+        <article class="panel chart-wrapper"><div class="panel-title"><div><p class="eyebrow">COMPONENTES RMS</p><h2>I1, H3, H5 y H7</h2></div></div><canvas id="spectrumChart" aria-label="Gráfico de componentes RMS extraídas"></canvas></article>
+      </section>
+
+      <section class="panel logs-container"><div class="panel-title"><div><p class="eyebrow">TRAZABILIDAD</p><h2>Registro de eventos</h2></div><button id="clear-logs" class="text-button" type="button">Limpiar</button></div><div id="logs-box" role="log" aria-live="polite"></div></section>
+    </section>
+
+    <section id="design-view" class="view" aria-labelledby="design-title" hidden>
+      <div class="page-heading"><div><p class="eyebrow">PREDIMENSIONAMIENTO ORIENTATIVO · IEC/RIC</p><h1 id="design-title">Diseño de tablero TAN</h1><p>Propone corriente, envolvente y forma de separación. No certifica IEC 61439 ni sustituye la memoria RIC.</p></div></div>
+      <div class="design-layout">
+        <form id="design-form" class="panel design-form">
+          <div class="panel-title"><div><p class="eyebrow">DATOS DEL PROYECTO</p><h2>Parámetros eléctricos</h2></div></div>
+          <div class="form-grid">
+            <label>Potencia instalada <span>kW</span><input name="potencia_kw" type="number" min="1" max="5000" step="0.1" value="120" required></label>
+            <label>Número de racks <span>salidas</span><input name="num_racks" type="number" min="1" max="200" value="8" required></label>
+            <label>Redundancia<select name="redundancia"><option>N</option><option selected>N+1</option><option>2N</option></select></label>
+            <label>Protección mínima<select name="ip_minimo"><option>IP30</option><option>IP31</option><option>IP40</option><option>IP41</option><option selected>IP54</option><option>IP55</option><option>IP65</option><option>IP66</option></select></label>
+          </div>
+          <div class="check-row"><label class="check"><input name="carga_armonica" type="checkbox" checked><span>Carga armónica</span></label><label class="check"><input name="sismico" type="checkbox"><span>Requisito sísmico</span></label></div>
+          <button class="button primary" type="submit">Calcular diseño</button>
+          <p id="form-message" class="form-message" role="alert"></p>
+        </form>
+
+        <section id="design-result" class="result-stack" aria-live="polite">
+          <article class="panel empty-result"><p class="eyebrow">RESULTADO DE PREINGENIERÍA</p><h2>Listo para calcular</h2><p>Al calcular se generan Excel, PDF, JSON, Markdown, HTML y CSV, con verificaciones y BOM. Si hay THDi del monitor, el informe lo incorpora.</p></article>
+        </section>
+      </div>
+    </section>
+
+    <section id="power-stage-view" class="view" aria-labelledby="power-stage-title" hidden>
+      <div class="page-heading power-heading">
+        <div><p class="eyebrow">CAPA A · SIL 24 V / 120 W SIMULADOS</p><h1 id="power-stage-title">Banco de potencia 24 V</h1><p>Modelo HIL: 24 V, 5 A, techo 30 V, OV 29 V. Máquina de estados, interlocks y E-stop. PWM y contactor son booleanos, no GPIO. La KPS305D no está cableada a este software.</p></div>
+        <span class="simulation-badge">SIMULACIÓN · SIN SALIDAS FÍSICAS</span>
+      </div>
+
+      <section class="power-overview" aria-label="Estado del banco de potencia">
+        <article class="power-state-card">
+          <span>Estado maestro</span><strong id="ps-state">CARGANDO</strong><small id="ps-fault">Sin fallas activas</small>
+        </article>
+        <article class="power-metric"><span>DC-link</span><strong id="ps-vdc">-- V</strong><small>Nominal 24 V · techo 30 V</small></article>
+        <article class="power-metric"><span>Corriente de fase</span><strong id="ps-current">-- A</strong><small>Límite 5 A (KPS305D)</small></article>
+        <article class="power-metric"><span>Temperatura</span><strong id="ps-temperature">-- °C</strong><small>Trip HIL 85 °C</small></article>
+      </section>
+
+      <div class="power-layout">
+        <section class="panel sequence-panel">
+          <div class="panel-title"><div><p class="eyebrow">SECUENCIA DE ENERGÍA</p><h2>Cadena de habilitación</h2></div></div>
+          <div class="power-chain" aria-label="Diagrama de estados de potencia">
+            <div class="chain-node" id="chain-source"><span>01</span><strong>Fuente HIL 24 V</strong><small>simulada · techo 30 V</small></div>
+            <div class="chain-line"></div>
+            <div class="chain-node" id="chain-precharge"><span>02</span><strong>Precarga</strong><small id="ps-precharge-label">0%</small></div>
+            <div class="chain-line"></div>
+            <div class="chain-node" id="chain-main"><span>03</span><strong>Contactor</strong><small>Principal</small></div>
+            <div class="chain-line"></div>
+            <div class="chain-node" id="chain-gates"><span>04</span><strong>Compuertas</strong><small>PWM HIL</small></div>
+          </div>
+          <div class="progress-track" aria-label="Progreso de precarga"><span id="ps-precharge-bar"></span></div>
+          <div class="interlock-grid">
+            <div id="interlock-estop"><span class="interlock-dot"></span>Parada de emergencia</div>
+            <div id="interlock-sensor"><span class="interlock-dot"></span>Sensores críticos</div>
+            <div id="interlock-driver"><span class="interlock-dot"></span>Driver de compuerta</div>
+          </div>
         </section>
 
-        <section class="charts-container">
-            <div class="chart-wrapper">
-                <h2>Onda Cruda vs Compensada</h2>
-                <canvas id="waveformChart"></canvas>
-            </div>
-            <div class="chart-wrapper">
-                <h2>Espectro de Frecuencia (FFT)</h2>
-                <canvas id="spectrumChart"></canvas>
-            </div>
-        </section>
+        <aside class="panel control-panel">
+          <div class="panel-title"><div><p class="eyebrow">MANDO LOCAL HIL</p><h2>Prueba de secuencia</h2></div></div>
+          <div class="control-buttons">
+            <button class="button primary ps-command" data-command="start" type="button">Iniciar autoprueba</button>
+            <button class="button secondary ps-command" data-command="enable" type="button">Habilitar PWM HIL</button>
+            <button class="button secondary ps-command" data-command="shutdown" type="button">Parada controlada</button>
+            <button class="button danger ps-command" data-command="estop" type="button">Parada de emergencia</button>
+          </div>
+          <div class="fault-test">
+            <label for="fault-select">Inyección de falla para pruebas</label>
+            <select id="fault-select"><option value="OVERCURRENT">Sobrecorriente</option><option value="DC_OVERVOLTAGE">Sobretensión DC</option><option value="OVERTEMPERATURE">Sobretemperatura</option><option value="SENSOR_FAULT">Falla de sensor</option><option value="GATE_DRIVER_FAULT">Falla de driver</option></select>
+            <button id="inject-fault" class="button secondary" type="button">Inyectar falla HIL</button>
+          </div>
+          <div class="reset-row"><button class="text-button ps-command" data-command="release_estop" type="button">Liberar E-stop</button><button class="text-button ps-command" data-command="reset_fault" type="button">Rearmar falla</button></div>
+          <p id="ps-message" class="form-message" role="alert"></p>
+        </aside>
+      </div>
 
-        <section class="logs-container">
-            <h2>Registro de Eventos en Vivo</h2>
-            <div id="logs-box"></div>
-        </section>
-    </main>
+      <section class="panel power-events"><div class="panel-title"><div><p class="eyebrow">SECUENCIA DE EVENTOS</p><h2>Historial de seguridad</h2></div></div><div id="ps-events" class="event-list" role="log" aria-live="polite"></div></section>
 
-    <footer>
-        <p>&copy; 2026 Snocomm Edge Controller. Prohibida su venta.</p>
-        <p><small>Ingeniería por ਕਿਰਤਅਨ ਤੈਗ ਸਿਨਗਹ (Kirtan Teg Singh)</small></p>
-    </footer>
+      <section class="panel bench-package" aria-labelledby="bench-title">
+        <div class="panel-title"><div><p class="eyebrow">CAPA B · PAÑOL CFT PAILLACO</p><h2 id="bench-title">Paquete del banco físico 24 V</h2></div></div>
+        <p class="bench-lead">wanptek KPS305D (0–30 V / 0–5 A, punto 24,0 V) + Gratten GA1102CAL (100 MHz, 2 ch, USB CSV). Este software no energiza la fuente ni manda GPIO.</p>
+        <ul id="bench-layers">
+          <li><strong>Capa A</strong> Software SIL: 24 V / 120 W simulados. physical_outputs_available = false.</li>
+          <li><strong>Capa B</strong> Pañol: wanptek KPS305D + Gratten GA1102CAL a 24 VDC.</li>
+          <li><strong>Capa C</strong> Fuera de TPA: 48 V, MCU/PWM/puente, 400 V.</li>
+        </ul>
+        <p id="bench-forbidden" class="bench-lead">Prohibido en este TPA: 48 V, 400 V, 500 kW, ~700 A.</p>
+        <div class="bench-grid">
+          <article><h3>Unifilar previsto</h3><ol id="bench-unifilar"></ol></article>
+          <article><h3>Riesgos</h3><ul id="bench-risks"></ul></article>
+          <article><h3>Material de pañol / laboratorio</h3><ul id="bench-bom"></ul></article>
+          <article><h3>Criterios de aceptación</h3><ul id="bench-accept"></ul></article>
+        </div>
+      </section>
+    </section>
+  </main>
 
-    <script src="/static/app.js"></script>
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div class="footer-brand"><strong>Snocomm</strong><span>Energy Control</span></div>
+      <div class="footer-meta"><span>AHF Edge Controller + TAN-Telecom</span><span class="footer-separator" aria-hidden="true"></span><span>2026</span></div>
+    </div>
+  </footer>
+  <script src="/static/app.js"></script>
 </body>
 </html>
