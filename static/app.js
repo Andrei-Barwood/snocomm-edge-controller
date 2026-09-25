@@ -7,6 +7,7 @@ const palette = { ink: "#303030", paper: "#D7E0EC", gold: "#E3CA75", indigo: "#5
 
 document.querySelectorAll(".nav-item").forEach((button) =>
   button.addEventListener("click", () => {
+    if (button.hidden) return;
     document.querySelectorAll(".nav-item").forEach((item) => {
       item.classList.remove("active");
       item.removeAttribute("aria-current");
@@ -392,3 +393,229 @@ refreshProject();
 loadBenchPackage();
 setInterval(refreshRuntime, 4000);
 connectWebSocket();
+
+let calcTemplates = [];
+let calcBarChart = null;
+let calcWaveChart = null;
+
+function showView(viewName) {
+  const target = document.querySelector(`.nav-item[data-view="${viewName}"]`);
+  if (target?.hidden) return;
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    const active = item.dataset.view === viewName;
+    item.classList.toggle("active", active);
+    if (active) item.setAttribute("aria-current", "page");
+    else item.removeAttribute("aria-current");
+  });
+  document.querySelectorAll(".view").forEach((view) => {
+    const active = view.id === `${viewName}-view`;
+    view.classList.toggle("active", active);
+    view.hidden = !active;
+  });
+  document.querySelector(".primary-nav").classList.remove("open");
+  $("mobile-menu").setAttribute("aria-expanded", "false");
+}
+
+document.querySelectorAll(".js-open-legal").forEach((button) =>
+  button.addEventListener("click", () => showView("legal"))
+);
+
+function fieldControl(field) {
+  if (field.type === "select") {
+    const options = (field.options || [])
+      .map((opt) => `<option${opt === field.default ? " selected" : ""}>${escapeHtml(opt)}</option>`)
+      .join("");
+    return `<select name="${escapeHtml(field.name)}">${options}</select>`;
+  }
+  if (field.type === "checkbox") {
+    return `<span class="check"><input name="${escapeHtml(field.name)}" type="checkbox"${field.default ? " checked" : ""}><span></span></span>`;
+  }
+  if (field.type === "text") {
+    return `<input name="${escapeHtml(field.name)}" type="text" value="${escapeHtml(field.default || "")}">`;
+  }
+  const step = field.step != null ? ` step="${escapeHtml(field.step)}"` : ' step="0.1"';
+  const unit = field.unit ? ` <span>${escapeHtml(field.unit)}</span>` : "";
+  return `${unit}<input name="${escapeHtml(field.name)}" type="number"${step} value="${escapeHtml(field.default ?? "")}">`;
+}
+
+function renderCalcFields(template) {
+  $("calc-template-summary").textContent = template.summary || "";
+  $("calc-template-iec").textContent = template.iec || "";
+  $("calc-fields").innerHTML = (template.fields || [])
+    .map((field) => `<label>${escapeHtml(field.label)}${fieldControl(field)}</label>`)
+    .join("");
+}
+
+function collectCalcParams(form) {
+  const params = {};
+  const template = calcTemplates.find((item) => item.id === $("calc-template").value);
+  (template?.fields || []).forEach((field) => {
+    if (field.type === "checkbox") {
+      const input = form.querySelector(`[name="${field.name}"]`);
+      params[field.name] = Boolean(input?.checked);
+    } else {
+      params[field.name] = form[field.name]?.value;
+    }
+  });
+  return params;
+}
+
+function ensureCalcCharts() {
+  if (calcBarChart) return;
+  calcBarChart = new Chart($("calcBarChart"), {
+    type: "bar",
+    data: { labels: [], datasets: [{ label: "Valor", backgroundColor: [palette.indigoDeep, palette.gold, palette.ink, "#8f3232"], data: [] }] },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { grid: { color: gridColor } }, x: { grid: { display: false } } },
+    },
+  });
+  calcWaveChart = new Chart($("calcWaveChart"), {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [
+        { label: "CSV anterior", borderColor: palette.indigo, borderWidth: 2, pointRadius: 0, data: [] },
+        { label: "CSV nuevo", borderColor: "#CCB244", borderWidth: 2, pointRadius: 0, data: [] },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { usePointStyle: true } } },
+      scales: { x: { display: false }, y: { grid: { color: gridColor } } },
+    },
+  });
+}
+
+function renderCalculator(data) {
+  ensureCalcCharts();
+  const charts = data.charts || {};
+  calcBarChart.data.labels = charts.labels || [];
+  calcBarChart.data.datasets[0].data = charts.values || [];
+  calcBarChart.update();
+  const before = charts.wave_before || [];
+  const after = charts.wave_after || [];
+  const n = Math.max(before.length, after.length, 1);
+  calcWaveChart.data.labels = Array.from({ length: n }, (_, i) => i);
+  calcWaveChart.data.datasets[0].data = before;
+  calcWaveChart.data.datasets[1].data = after;
+  calcWaveChart.update();
+  const pill = (data.status || "").toLowerCase();
+  const suggestions = (data.suggestions || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const pdf = data.pdf
+    ? `<a class="button primary report-link" href="${escapeHtml(data.pdf.url)}" download>Descargar informe PDF</a>`
+    : "";
+  $("calculator-result").innerHTML = `
+    <article class="panel result-hero">
+      <p class="eyebrow">${escapeHtml(data.run_id || "")}</p>
+      <h2>${escapeHtml(data.template.name)}</h2>
+      <p><span class="status-pill ${escapeHtml(pill)}">${escapeHtml(data.status_label)}</span> · ${escapeHtml(data.template.iec)}</p>
+    </article>
+    <div class="result-grid">
+      <div class="result-metric"><span>Medido</span><strong>${data.measured == null ? "—" : escapeHtml(String(data.measured))}</strong></div>
+      <div class="result-metric"><span>Diseño</span><strong>${data.design == null ? "—" : escapeHtml(String(data.design))}</strong></div>
+      <div class="result-metric"><span>Desvío</span><strong>${data.abs_delta == null ? "—" : escapeHtml(String(data.abs_delta))}</strong></div>
+      <div class="result-metric"><span>Relativo</span><strong>${data.rel_delta_pct == null ? "—" : escapeHtml(String(data.rel_delta_pct)) + " %"}</strong></div>
+    </div>
+    <article class="panel"><p class="eyebrow">LECTURA</p><h2>${escapeHtml(data.metric_label)}</h2><p>${escapeHtml(data.narrative)}</p></article>
+    <article class="panel"><p class="eyebrow">IEC 61439-1 &amp; -2</p><h2>Por qué conviene el conjunto</h2><p>${escapeHtml(data.iec_note)}</p></article>
+    <article class="panel chart-wrapper" id="calc-bar-panel"><div class="panel-title"><div><p class="eyebrow">COMPARACIÓN</p><h2>Valores de campaña y diseño</h2></div></div></article>
+    <article class="panel"><p class="eyebrow">SUGERENCIAS</p><h2>Decisiones informadas</h2><ul class="calc-suggestions">${suggestions}</ul><div class="export-actions" style="margin-top:14px">${pdf}</div></article>
+  `;
+  $("calc-bar-panel").appendChild(calcBarChart.canvas);
+  calcBarChart.resize();
+  if (before.length || after.length) {
+    const wavePanel = document.createElement("article");
+    wavePanel.className = "panel chart-wrapper";
+    wavePanel.innerHTML = `<div class="panel-title"><div><p class="eyebrow">FORMA DE ONDA</p><h2>CSV anterior y nuevo</h2></div></div>`;
+    wavePanel.appendChild(calcWaveChart.canvas);
+    $("calculator-result").appendChild(wavePanel);
+    calcWaveChart.resize();
+  }
+}
+
+async function loadCalculator() {
+  try {
+    const data = await (await fetch("/api/calculator/templates")).json();
+    calcTemplates = data.templates || [];
+    $("calc-template").innerHTML = calcTemplates
+      .map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.id)} · ${escapeHtml(item.name)}</option>`)
+      .join("");
+    if (calcTemplates[0]) renderCalcFields(calcTemplates[0]);
+  } catch (_error) {
+    $("calc-message").textContent = "No se pudieron cargar las 24 plantillas.";
+  }
+  try {
+    const pack = await (await fetch("/api/calculator/examples")).json();
+    $("demo-example-list").innerHTML = (pack.examples || [])
+      .map(
+        (item) =>
+          `<a class="demo-card" href="${escapeHtml(item.url)}" download>
+            <small>${escapeHtml(item.template_id)} · ${escapeHtml(item.role)}</small>
+            <strong>${escapeHtml(item.title)}</strong>
+            <small>${escapeHtml(item.story)}</small>
+          </a>`
+      )
+      .join("");
+  } catch (_error) {
+    $("demo-example-list").innerHTML = "<p class=\"muted\">No se pudieron listar los CSV de demo.</p>";
+  }
+}
+
+$("calc-template").addEventListener("change", () => {
+  const template = calcTemplates.find((item) => item.id === $("calc-template").value);
+  if (template) renderCalcFields(template);
+});
+
+$("calculator-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  $("calc-message").textContent = "";
+  const after = $("calc-csv-after").files[0];
+  const before = $("calc-csv-before").files[0];
+  if (!after && !before) {
+    $("calc-message").textContent = "Adjunte al menos un CSV del osciloscopio.";
+    return;
+  }
+  const body = new FormData();
+  body.append("template_id", $("calc-template").value);
+  body.append("params", JSON.stringify(collectCalcParams(event.currentTarget)));
+  if (before) body.append("csv_before", before);
+  if (after) body.append("csv_after", after);
+  const submit = event.currentTarget.querySelector("button[type=submit]");
+  submit.disabled = true;
+  submit.textContent = "Comparando…";
+  try {
+    const response = await fetch("/api/calculator/analyze", { method: "POST", body });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "No se pudo comparar.");
+    renderCalculator(data);
+  } catch (error) {
+    $("calc-message").textContent = error.message;
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "Comparar y sugerir";
+  }
+});
+
+async function loadLegal() {
+  try {
+    const data = await (await fetch("/api/calculator/legal")).json();
+    $("legal-eyebrow").textContent = data.eyebrow || "MARCO DE USO";
+    $("legal-title").textContent = data.title;
+    $("legal-lead").textContent = data.lead || "";
+    $("legal-sections").innerHTML = (data.sections || [])
+      .map(
+        (section) =>
+          `<article class="legal-article"><h2>${escapeHtml(section.heading)}</h2>${(section.body || [])
+            .map((p) => `<p>${escapeHtml(p)}</p>`)
+            .join("")}</article>`
+      )
+      .join("");
+  } catch (_error) {
+    $("legal-lead").textContent = "No se pudo cargar el marco legal.";
+  }
+}
+
+loadCalculator();
+loadLegal();

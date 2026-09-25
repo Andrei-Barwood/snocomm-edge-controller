@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from acquisition_service import router as acquisition_router
+from calculator_service import router as calculator_router
 from power_stage_service import router as power_stage_router
 from project_service import router as project_router
 from project_store import store
@@ -16,6 +17,7 @@ app.include_router(power_stage_router)
 app.include_router(tan_router)
 app.include_router(project_router)
 app.include_router(acquisition_router)
+app.include_router(calculator_router)
 store.configure("hil", "none", "hil_simulation")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

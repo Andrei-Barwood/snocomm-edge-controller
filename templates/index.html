@@ -11,11 +11,11 @@
 <body>
   <a class="skip-link" href="#main-content">Saltar al contenido</a>
   <header class="app-header">
-    <a class="brand" href="#monitor" aria-label="Snocomm, inicio">
+    <a class="brand" href="#calculator" aria-label="Snocomm, inicio">
       <span class="brand-mark" aria-hidden="true">S</span>
       <span><strong>SNOCOMM</strong><small>ENERGY CONTROL</small></span>
     </a>
-    <div class="runtime-status" id="runtime-status" role="status">
+    <div class="runtime-status" id="runtime-status" role="status" hidden>
       <div class="status-chip" id="chip-server"><span class="status-dot"></span><small>Servidor</small><strong id="chip-server-label">…</strong></div>
       <div class="status-chip" id="chip-acq"><span class="status-dot muted"></span><small>Adquisición</small><strong id="chip-acq-label">…</strong></div>
       <div class="status-chip" id="chip-hw"><span class="status-dot muted"></span><small>Hardware</small><strong id="chip-hw-label">…</strong></div>
@@ -24,13 +24,15 @@
   </header>
 
   <nav id="primary-nav" class="primary-nav" aria-label="Navegación principal">
-    <button class="nav-item active" data-view="monitor" aria-current="page">Monitor AHF</button>
-    <button class="nav-item" data-view="design">Diseño TAN</button>
-    <button class="nav-item" data-view="power-stage">Banco 24V</button>
-    <span class="nav-context">Preingeniería · simulación académica</span>
+    <button class="nav-item" data-view="monitor" hidden>Monitor AHF</button>
+    <button class="nav-item" data-view="design" hidden>Diseño TAN</button>
+    <button class="nav-item" data-view="power-stage" hidden>Banco 24V</button>
+    <button class="nav-item active" data-view="calculator" aria-current="page">Calculadora</button>
+    <button class="nav-item" data-view="legal">Legislación</button>
+    <span class="nav-context">Preingeniería · IEC 61439-1/2</span>
   </nav>
 
-  <section class="project-bar" id="project-bar" aria-label="Proyecto común">
+  <section class="project-bar" id="project-bar" aria-label="Proyecto común" hidden>
     <div><p class="eyebrow">PROYECTO COMÚN</p><strong id="project-id">—</strong></div>
     <div><span>THDi → TAN</span><strong id="project-thdi">sin datos DSP</strong></div>
     <div><span>I compensación</span><strong id="project-icomp">—</strong></div>
@@ -39,7 +41,7 @@
   </section>
 
   <main id="main-content">
-    <section id="monitor-view" class="view active" aria-labelledby="monitor-title">
+    <section id="monitor-view" class="view" aria-labelledby="monitor-title" hidden>
       <div class="page-heading">
         <div>
           <p class="eyebrow">SEÑAL PATRÓN · REFERENCIA DE COMPENSACIÓN</p>
@@ -188,12 +190,87 @@
         </div>
       </section>
     </section>
+
+    <section id="calculator-view" class="view active" aria-labelledby="calculator-title">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">COMPARACIÓN CSV · 24 PLANTILLAS DE PREDISEÑO</p>
+          <h1 id="calculator-title">Calculadora de tablero TAN</h1>
+          <p>Sube un CSV del osciloscopio —o dos, anterior y nuevo— elige el caso del rack y obtén un informe con gráficos. IEC 61439-1 y -2 como brújula de conjunto, no como adorno.</p>
+        </div>
+      </div>
+      <p class="legal-chip"><span>Prediseño informado.</span> <button type="button" class="text-button js-open-legal">Legislación, autorizaciones y validez comercial</button></p>
+
+      <section class="panel demo-examples" aria-labelledby="demo-examples-title">
+        <div class="panel-title">
+          <div>
+            <p class="eyebrow">EXAMEN · CAMPAÑAS DE DEMOSTRACIÓN</p>
+            <h2 id="demo-examples-title">CSV de ejemplo</h2>
+          </div>
+        </div>
+        <p class="muted">Descarga, súbelos como CSV anterior / nuevo y sigue el guion: T01 estable → T01 caída → T20 antes/después. Los de 24 V imitan el Gratten; los de 3 fases son sintéticos (el scope tiene 2 canales).</p>
+        <div id="demo-example-list" class="demo-example-list"></div>
+      </section>
+
+      <div class="calculator-layout">
+        <form id="calculator-form" class="panel design-form" aria-labelledby="calc-form-title">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">CASO DE INGENIERÍA</p>
+              <h2 id="calc-form-title">Plantilla y campañas</h2>
+            </div>
+          </div>
+          <label>Plantilla
+            <select id="calc-template" name="template_id" required></select>
+          </label>
+          <p id="calc-template-summary" class="muted"></p>
+          <p id="calc-template-iec" class="calc-iec"></p>
+          <div id="calc-fields" class="form-grid"></div>
+          <div class="import-grid calc-files">
+            <label>CSV anterior (opcional) <input id="calc-csv-before" type="file" accept=".csv,.txt,text/csv"></label>
+            <label>CSV nuevo <input id="calc-csv-after" type="file" accept=".csv,.txt,text/csv"></label>
+          </div>
+          <p class="muted">Gratten GA1102CAL u otro scope que exporte CSV. Un archivo basta; dos permiten ver el antes y el después del mismo punto de medida.</p>
+          <button class="button primary" type="submit">Comparar y sugerir</button>
+          <p id="calc-message" class="form-message" role="alert"></p>
+          <div hidden>
+            <canvas id="calcBarChart"></canvas>
+            <canvas id="calcWaveChart"></canvas>
+          </div>
+        </form>
+
+        <section id="calculator-result" class="result-stack" aria-live="polite">
+          <article class="panel empty-result">
+            <p class="eyebrow">INFORME COMPARATIVO</p>
+            <h2>Listo para un CSV</h2>
+            <p>Elige una plantilla, adjunta la campaña del rack y la calculadora arma el contraste con el valor de diseño. El PDF sale con barras y forma de onda.</p>
+          </article>
+        </section>
+      </div>
+    </section>
+
+    <section id="legal-view" class="view" aria-labelledby="legal-title" hidden>
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow" id="legal-eyebrow">MARCO DE USO</p>
+          <h1 id="legal-title">Legislaciones, documentación, autorizaciones y validez comercial</h1>
+          <p id="legal-lead"></p>
+        </div>
+      </div>
+      <div id="legal-sections" class="legal-stack"></div>
+    </section>
   </main>
 
   <footer class="app-footer">
     <div class="footer-inner">
       <div class="footer-brand"><strong>Snocomm</strong><span>Energy Control</span></div>
-      <div class="footer-meta"><span>AHF Edge Controller + TAN-Telecom</span><span class="footer-separator" aria-hidden="true"></span><span>2026</span></div>
+      <div class="footer-meta">
+        <span>AHF Edge Controller + TAN-Telecom</span>
+        <span class="footer-separator" aria-hidden="true"></span>
+        <button type="button" class="footer-legal js-open-legal">Legislación y validez comercial</button>
+        <span class="footer-separator" aria-hidden="true"></span>
+        <span>2026</span>
+      </div>
     </div>
   </footer>
   <script src="/static/app.js"></script>

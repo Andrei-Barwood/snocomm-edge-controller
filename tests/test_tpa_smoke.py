@@ -63,6 +63,13 @@ def test_physical_outputs_false_in_run():
     assert running["physical_outputs_available"] is False
 
 
+def test_calculator_templates_are_mounted():
+    client = TestClient(app)
+    data = client.get("/api/calculator/templates").json()
+    assert data["count"] == 24
+    assert data["templates"][0]["id"] == "T01"
+
+
 def test_tan_small_example_does_not_explode():
     inputs = ProjectInputs(
         45.0, 4, Redundancia.N, ip_minimo=54, example_name="small"
