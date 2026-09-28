@@ -4,16 +4,14 @@ Interfaz de línea de comandos profesional (Typer + Rich) para TAN-Telecom.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
-from rich import box
 
 from .export import export_bundle
 from .models import ProjectInputs, ProjectResult
@@ -177,13 +175,13 @@ def execute_design(inputs: ProjectInputs) -> ProjectResult:
 
 @app.command("run")
 def run_cmd(
-    potencia_kw: Optional[float] = typer.Option(
+    potencia_kw: float | None = typer.Option(
         None, "--potencia-kw", help="Potencia total instalada en kW."
     ),
-    num_racks: Optional[int] = typer.Option(
+    num_racks: int | None = typer.Option(
         None, "--num-racks", help="Número de racks / salidas."
     ),
-    redundancia: Optional[str] = typer.Option(
+    redundancia: str | None = typer.Option(
         None, "--redundancia", help="Esquema de redundancia: N | N+1 | 2N."
     ),
     ip_minimo: int = typer.Option(
@@ -198,7 +196,7 @@ def run_cmd(
     output: str = typer.Option(
         "./output", "--output", help="Carpeta de salida de Excel/PDF/JSON."
     ),
-    example: Optional[str] = typer.Option(
+    example: str | None = typer.Option(
         None, "--example", help="Configuración de ejemplo: small | medium | large."
     ),
     verbose: bool = typer.Option(
@@ -255,13 +253,13 @@ def run_cmd(
 @app.callback(invoke_without_command=True)
 def main_callback(
     ctx: typer.Context,
-    potencia_kw: Optional[float] = typer.Option(
+    potencia_kw: float | None = typer.Option(
         None, "--potencia-kw", help="Potencia total instalada en kW."
     ),
-    num_racks: Optional[int] = typer.Option(
+    num_racks: int | None = typer.Option(
         None, "--num-racks", help="Número de racks / salidas."
     ),
-    redundancia: Optional[str] = typer.Option(
+    redundancia: str | None = typer.Option(
         None, "--redundancia", help="Esquema de redundancia: N | N+1 | 2N."
     ),
     ip_minimo: int = typer.Option(
@@ -276,7 +274,7 @@ def main_callback(
     output: str = typer.Option(
         "./output", "--output", help="Carpeta de salida."
     ),
-    example: Optional[str] = typer.Option(
+    example: str | None = typer.Option(
         None, "--example", help="Ejemplo: small | medium | large."
     ),
     verbose: bool = typer.Option(

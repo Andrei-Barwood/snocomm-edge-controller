@@ -235,4 +235,4 @@ pytest -q
 ## 12. Licencia y autoría
 
 Uso académico / profesional de apoyo a ingeniería.  
-Autor del TPA: **Andrei Barwood** — CFT Electricidad.
+Autor del TPA: **Andres Barbudo Rodriguez** — CFT Paillaco.

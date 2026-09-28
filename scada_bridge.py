@@ -1,9 +1,10 @@
 import asyncio
 import logging
+
 import numpy as np
 from pymodbus.client import AsyncModbusTcpClient
-from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 from pymodbus.constants import Endian
+from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
 logger = logging.getLogger(__name__)
 

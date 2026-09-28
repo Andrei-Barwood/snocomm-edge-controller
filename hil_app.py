@@ -11,7 +11,6 @@ from project_service import router as project_router
 from project_store import store
 from tan_service import router as tan_router
 
-
 app = FastAPI(title="Snocomm 24 V HIL")
 app.include_router(power_stage_router)
 app.include_router(tan_router)

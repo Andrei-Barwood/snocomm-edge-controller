@@ -1,15 +1,16 @@
 import asyncio
 import logging
-import uvicorn
 import webbrowser
+
+import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 import main as controller_main
 import mock_scada_server
-from tan_service import router as tan_router
 from power_stage_service import router as power_stage_router
+from tan_service import router as tan_router
 
 # Configuración de log
 logging.basicConfig(level=logging.INFO)

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import math
+from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
@@ -13,9 +13,6 @@ from dsp.core import (
     CHANNEL_IB,
     CHANNEL_IC,
     CHANNEL_IN,
-    CHANNEL_VA,
-    CHANNEL_VB,
-    CHANNEL_VC,
     NUM_CHANNELS,
     BlockDspController,
     rms,

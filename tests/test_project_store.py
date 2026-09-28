@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from project_store import ProjectStore, compensation_current_a, suggest_ahf_module
 from bench_package import bench_package
+from project_store import ProjectStore, compensation_current_a, suggest_ahf_module
 
 
 def test_compensation_current_and_module():

@@ -1,7 +1,7 @@
-import sys
 import yaml
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.exceptions import InfluxDBError
+
 
 def main():
     with open('config_industrial.yaml', 'r') as f:

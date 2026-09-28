@@ -1,11 +1,13 @@
 import asyncio
 import logging
-import yaml
 import time
+
 import numpy as np
+import yaml
 
 from dsp_engine import HarmonicCompensator
 from scada_bridge import ModbusScadaClient
+
 
 def load_config(path: str) -> dict:
     with open(path, 'r') as f:

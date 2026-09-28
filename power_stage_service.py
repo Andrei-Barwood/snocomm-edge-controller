@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Optional
 
 from power_stage import PowerStageController
 from project_store import store
@@ -12,7 +11,7 @@ from project_store import store
 
 class PowerStageCommand(BaseModel):
     command: str
-    fault: Optional[str] = None
+    fault: str | None = None
 
 
 runtime = PowerStageController()

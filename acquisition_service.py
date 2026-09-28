@@ -9,7 +9,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
-from acquisition.parser import parse_csv, parse_json_campaign, suggest_mapping
+from acquisition.parser import parse_csv, parse_json_campaign
 from acquisition.pipeline import example_scope_csv, process_campaign
 from project_store import store
 

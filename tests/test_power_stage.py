@@ -1,6 +1,11 @@
 import pytest
 
-from power_stage import FaultCode, PowerStageConfig, PowerStageController, PowerStageState
+from power_stage import (
+    FaultCode,
+    PowerStageConfig,
+    PowerStageController,
+    PowerStageState,
+)
 
 
 def advance_until(controller, target, attempts=100):

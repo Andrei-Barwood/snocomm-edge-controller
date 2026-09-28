@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -122,7 +123,7 @@ def _waves(pdf: CalculatorPDF, before: list[float], after: list[float]) -> None:
             x = pdf.l_margin + width * i / n
             y = y0 + height - (val - vmin) / span * (height - 4) - 2
             pts.append((x, y))
-        for (x1, y1), (x2, y2) in zip(pts, pts[1:]):
+        for (x1, y1), (x2, y2) in itertools.pairwise(pts):
             pdf.line(x1, y1, x2, y2)
     pdf.set_y(y0 + height + 4)
 

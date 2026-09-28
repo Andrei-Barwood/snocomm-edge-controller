@@ -6,11 +6,11 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
+import acquisition_service
 from acquisition.parser import parse_csv, parse_json_campaign
 from acquisition.pipeline import example_scope_csv, process_campaign
 from hil_app import app
 from project_store import store
-import acquisition_service
 
 PANOL_24V_CSV = (
     Path(__file__).resolve().parents[1] / "acquisition" / "panol_24v_gratten_example.csv"

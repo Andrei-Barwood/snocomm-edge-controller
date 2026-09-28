@@ -4,7 +4,7 @@
 **Tipo**: Open Source
 **Licencia**: MIT
 **Propietario**: snocomm (prohibido venderlo)
-**Autor**: ਕਿਰਤਅਨ ਤੈਗ ਸਿਨਗਹ (Kirtan Teg Singh)
+**Autor**: Andres Barbudo Rodriguez
 
 Este repositorio es la plataforma académica del TPA: preingeniería de tableros BT, DSP 3P+N sobre señales patrón y validación SIL de un banco de **24 V**. Hoy calcula y simula; no mide con instrumento certificado ni inyecta corriente.
 

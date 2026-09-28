@@ -9,11 +9,12 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tan_telecom.models import ProjectInputs, Redundancia, FormaSeparacion
-from tan_telecom.rules import run_design, select_separation_form
+import json
+
 from tan_telecom.calculations import compute_electrical
 from tan_telecom.export import export_bundle
-import json
+from tan_telecom.models import FormaSeparacion, ProjectInputs, Redundancia
+from tan_telecom.rules import run_design, select_separation_form
 
 
 def test_small_prefers_2b():

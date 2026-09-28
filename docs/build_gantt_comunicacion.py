@@ -186,15 +186,12 @@ def week_end(week: int) -> date:
 
 
 def fmt(d: date) -> str:
-    months = "ene feb mar abr may jun jul ago sep oct nov dic".split()
+    months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
     return f"{d.day:02d}-{months[d.month - 1]}-{d.year}"
 
 
 def fmt_long(d: date) -> str:
-    months = (
-        "enero febrero marzo abril mayo junio julio agosto "
-        "septiembre octubre noviembre diciembre"
-    ).split()
+    months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
     return f"{d.day} de {months[d.month - 1]} de {d.year}"
 
 

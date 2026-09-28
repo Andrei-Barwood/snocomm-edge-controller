@@ -12,6 +12,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from .calculations import compute_electrical
 from .models import (
     BOMItem,
     ElectricalResults,
@@ -24,7 +25,6 @@ from .models import (
     VerificationItem,
     make_project_id,
 )
-from .calculations import compute_electrical
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 CATALOG_PATH = DATA_DIR / "xl3_catalog.json"
@@ -100,21 +100,21 @@ def select_enclosure(
         # Fallback: la de mayor capacidad, documentando incumplimientos residuales
         env = catalogo[-1]
         just = [
-            "No se encontró envolvente que cumpla todos los filtros; se selecciona "
-            f"la de mayor capacidad ({env['codigo']}) como referencia de escalado.",
+            ("No se encontró envolvente que cumpla todos los filtros; se selecciona "
+            f"la de mayor capacidad ({env['codigo']}) como referencia de escalado."),
             *justificaciones_fallidas[-3:],
         ]
     else:
         env = elegidas[0]
         just = [
-            f"Menor envolvente que cumple In de selección {in_req:.0f} A "
-            f"(capacidad {env['corriente_max_a']} A).",
-            f"Icw/Icc catálogo {env['icw_ka']}/{env['icc_ka']} kA ≥ requeridos "
-            f"{electrical.icw_requerida_ka}/{electrical.icc_estimada_ka} kA.",
-            f"IP disponible compatible con IP{inputs.ip_minimo} "
-            f"(seleccionada IP{_ip_seleccionado(env['ip_disponibles'], inputs.ip_minimo)}).",
-            f"Capacidad de salidas: hasta {env['salidas_max_recomendadas']} "
-            f"(proyecto: {inputs.num_racks}).",
+            (f"Menor envolvente que cumple In de selección {in_req:.0f} A "
+            f"(capacidad {env['corriente_max_a']} A)."),
+            (f"Icw/Icc catálogo {env['icw_ka']}/{env['icc_ka']} kA ≥ requeridos "
+            f"{electrical.icw_requerida_ka}/{electrical.icc_estimada_ka} kA."),
+            (f"IP disponible compatible con IP{inputs.ip_minimo} "
+            f"(seleccionada IP{_ip_seleccionado(env['ip_disponibles'], inputs.ip_minimo)})."),
+            (f"Capacidad de salidas: hasta {env['salidas_max_recomendadas']} "
+            f"(proyecto: {inputs.num_racks})."),
         ]
         if inputs.sismico:
             just.append("Cumple requisito de resistencia sísmica del catálogo tipificado.")
@@ -193,8 +193,8 @@ def select_separation_form(
         criticidad = "muy alta"
         just = [
             "Criticidad muy alta: dual feed y/o alta densidad con requisitos reforzados.",
-            "Forma 4b: UF segregadas y bornes en compartimentos individuales, "
-            "máxima mantenibilidad y limitación de fallas internas.",
+            ("Forma 4b: UF segregadas y bornes en compartimentos individuales, "
+            "máxima mantenibilidad y limitación de fallas internas."),
             "Alineado a preferencia de Form 4b en escenarios de SLA extremo (Legrand / IEC 61439-2).",
         ]
         alternativas = ["3b", "4a"]
@@ -203,8 +203,8 @@ def select_separation_form(
         criticidad = "alta"
         just = [
             "Criticidad alta (redundancia, multi-rack o corriente media-alta).",
-            "Forma 3b: separación barras/UF, separación entre UF y bornes "
-            "en zona de cables separada de barras.",
+            ("Forma 3b: separación barras/UF, separación entre UF y bornes "
+            "en zona de cables separada de barras."),
             "Permite intervención selectiva sin exponer todas las unidades funcionales.",
         ]
         if inputs.carga_armonica:
@@ -494,7 +494,7 @@ def build_bom(
         BOMItem(
             codigo="UF-UPS",
             descripcion="Salida UPS / servicios críticos",
-            cantidad=1 if inputs.redundancia != Redundancia.N else 1,
+            cantidad=1,
             unidad="u",
             categoria="Salidas",
         ),

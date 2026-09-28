@@ -13,13 +13,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tan_telecom.calculations import (
+    compute_electrical,
     corriente_nominal_base,
     normalizar_corriente,
     rdf_por_circuitos,
-    compute_electrical,
 )
 from tan_telecom.models import ProjectInputs, Redundancia
-from tan_telecom.validators import build_inputs, ValidationError
+from tan_telecom.validators import ValidationError, build_inputs
 
 
 def test_corriente_nominal_base_45kw():

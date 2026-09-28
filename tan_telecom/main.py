@@ -10,6 +10,7 @@ Uso:
 
 from __future__ import annotations
 
+
 def main() -> None:
     """Lanza la CLI Typer."""
     from .cli import run

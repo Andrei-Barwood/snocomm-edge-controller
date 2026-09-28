@@ -1,7 +1,7 @@
 """Adquisición universal: CSV de osciloscopio, JSON de central y registros."""
 
-from .pipeline import ImportResult, process_campaign
 from .parser import ParsedTable, parse_csv, parse_json_campaign, suggest_mapping
+from .pipeline import ImportResult, process_campaign
 
 __all__ = [
     "ImportResult",

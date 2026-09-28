@@ -3,26 +3,32 @@ Project: AHF Edge Controller
 Type: Open Source
 License: MIT
 Owner: snocomm (prohibido venderlo)
-Author: ਕਿਰਤਅਨ ਤੈਗ ਸਿਨਗਹ (Kirtan Teg Singh)
+Author: Andres Barbudo Rodriguez
 """
 import asyncio
 import logging
-import uvicorn
-import webbrowser
 import time
-from influxdb_client import InfluxDBClient, Point, WritePrecision
-from influxdb_client.client.write_api import ASYNCHRONOUS
+import webbrowser
+
+import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import ASYNCHRONOUS
+from pymodbus.datastore import (
+    ModbusSequentialDataBlock,
+    ModbusServerContext,
+    ModbusSlaveContext,
+)
 from pymodbus.server import StartAsyncTcpServer, StartAsyncTlsServer
-from pymodbus.datastore import ModbusSequentialDataBlock, ModbusServerContext, ModbusSlaveContext
-from tan_service import router as tan_router
-from power_stage_service import router as power_stage_router
-from project_service import router as project_router
+
 from acquisition_service import router as acquisition_router
 from calculator_service import router as calculator_router
+from power_stage_service import router as power_stage_router
+from project_service import router as project_router
 from project_store import store
+from tan_service import router as tan_router
 
 logger = logging.getLogger("Supervisory")
 
@@ -178,7 +184,7 @@ async def startup_event():
             try:
                 data = tq_global.get()
                 asyncio.run_coroutine_threadsafe(async_queue.put(data), loop)
-            except Exception as e:
+            except Exception:
                 pass
                 
     threading.Thread(target=queue_bridge, daemon=True).start()

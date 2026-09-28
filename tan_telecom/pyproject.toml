@@ -9,7 +9,7 @@ description = "CLI de diseño paramétrico de tableros TAN (IEC 61439) para nodo
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "Andrei Barwood / CFT Electricidad" }]
+authors = [{ name = "Andres Barbudo Rodriguez", email = "andres.barbudo@example.com" }]
 keywords = ["IEC 61439", "TAN", "tableros", "telecomunicaciones", "CLI"]
 dependencies = [
   "typer>=0.12.0",

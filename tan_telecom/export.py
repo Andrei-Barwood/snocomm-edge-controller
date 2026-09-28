@@ -8,7 +8,11 @@ from typing import Any
 
 from .generators.excel_generator import generate_excel
 from .generators.pdf_generator import generate_pdf
-from .generators.text_generators import generate_bom_csv, generate_html, generate_markdown
+from .generators.text_generators import (
+    generate_bom_csv,
+    generate_html,
+    generate_markdown,
+)
 from .models import ProjectResult
 
 REPORT_FORMATS: dict[str, tuple[str, str]] = {

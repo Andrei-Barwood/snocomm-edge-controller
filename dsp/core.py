@@ -7,9 +7,9 @@ THDi = Ih / I1, no Ih / Irms_total.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 import math
 import time
+from dataclasses import asdict, dataclass
 from typing import Any
 
 import numpy as np
@@ -283,7 +283,7 @@ class BlockDspController:
             7: -np.vstack([h7_ia, h7_ib, h7_ic]),
         }
         comp_abc, is_saturated = self._apply_priority_limit(components)
-        in_comp = comp_abc[0] + comp_abc[1] + comp_abc[2]
+        comp_abc[0] + comp_abc[1] + comp_abc[2]
 
         i1_rms = rms(i1_a)
         h3_rms = rms(h3_ia)

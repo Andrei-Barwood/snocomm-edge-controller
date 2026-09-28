@@ -1,11 +1,15 @@
 import asyncio
 import logging
+
 import numpy as np
-from pymodbus.server import StartAsyncTcpServer
-from pymodbus.datastore import ModbusSequentialDataBlock
-from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext
-from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.constants import Endian
+from pymodbus.datastore import (
+    ModbusSequentialDataBlock,
+    ModbusServerContext,
+    ModbusSlaveContext,
+)
+from pymodbus.payload import BinaryPayloadBuilder
+from pymodbus.server import StartAsyncTcpServer
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("mock_scada")

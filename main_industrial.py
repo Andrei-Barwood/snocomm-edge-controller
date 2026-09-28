@@ -3,18 +3,18 @@ Project: AHF Edge Controller
 Type: Open Source
 License: MIT
 Owner: snocomm (prohibido venderlo)
-Author: ਕਿਰਤਅਨ ਤੈਗ ਸਿਨਗਹ (Kirtan Teg Singh)
+Author: Andres Barbudo Rodriguez
 """
-import multiprocessing as mp
-import yaml
-import time
 import logging
-import sys
+import multiprocessing as mp
+import time
 
-from signal_generator import start_generator_process
-from hard_realtime_loop import start_hrt_process
-from supervisory_process import start_ts_process
+import yaml
+
 from adc_hardware_driver import start_hardware_process
+from hard_realtime_loop import start_hrt_process
+from signal_generator import start_generator_process
+from supervisory_process import start_ts_process
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(processName)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("MainIndustrial")

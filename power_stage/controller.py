@@ -6,12 +6,12 @@ point). This module has no GPIO, PWM, contactor, or gate-driver backend.
 
 from __future__ import annotations
 
+import math
+import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from enum import Enum
-import math
 from threading import RLock
-import time
 from typing import Any
 
 

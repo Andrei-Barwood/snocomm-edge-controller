@@ -17,7 +17,6 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph, Table, TableStyle
 
-
 OUT = Path(
     "/Users/andreibarwood/Documents/CFT/2026/02 - Semestre 2/01 - TPA"
     "/Arbol_problemas_proyecto_academico_Snocomm.pdf"
@@ -176,27 +175,27 @@ def draw_tree(c):
     causes = [
         (
             "CAUSAS ELÉCTRICAS Y DE INFORMACIÓN",
-            "- Cargas TI no lineales y desequilibrio 3P+N\n"
+            ("- Cargas TI no lineales y desequilibrio 3P+N\n"
             "- H3 de secuencia cero se suma en el neutro\n"
             "- Pocos datos de terreno y campañas cortas\n"
             "- El Gratten GA1102CAL no es analizador certificado\n"
-            "- Un DC de 24 V no demuestra H3/H5/H7",
+            "- Un DC de 24 V no demuestra H3/H5/H7"),
         ),
         (
             "CAUSAS METODOLÓGICAS",
-            "- Cálculos, normas y medición tratados por separado\n"
+            ("- Cálculos, normas y medición tratados por separado\n"
             "- Hojas manuales y supuestos difíciles de auditar\n"
             "- Sin modelo común entre monitoreo y tablero\n"
             "- Poca trazabilidad requisito -> cálculo -> prueba\n"
-            "- Cumplimiento confundido con predimensionamiento",
+            "- Cumplimiento confundido con predimensionamiento"),
         ),
         (
             "CAUSAS DE PROTOTIPADO Y SEGURIDAD",
-            "- Validar a 400 V no cabe en el CFT (sin ~700 A)\n"
+            ("- Validar a 400 V no cabe en el CFT (sin ~700 A)\n"
             "- La KPS305D topea a 30 V: 48 V no es medio de prueba\n"
             "- Este software no genera PWM ni manda la fuente\n"
             "- Python/Linux no garantiza hard real-time\n"
-            "- Scope de 2 canales; no hay 3P+N simultáneo",
+            "- Scope de 2 canales; no hay 3P+N simultáneo"),
         ),
     ]
 
